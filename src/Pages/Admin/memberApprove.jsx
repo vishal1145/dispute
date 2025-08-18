@@ -1,15 +1,20 @@
 import React, { useState, useEffect } from "react";
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
-import jobData from "../../Data/jobData.json";
 import Header from "../../components/header";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-// import { FiFilter, FiPlus } from "react-icons/fi";
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Button,
+} from "@mui/material";
 
 const PRODUCTS_PER_PAGE = 10;
 
@@ -19,19 +24,22 @@ export default function MemberApprove() {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState([]);
-  const [statusFilter, setStatusFilter] = useState("inactive");
+  const [statusFilter, setStatusFilter] = useState("all");
 
-  // Fetch data from API when component mounts
+  // state for confirmation dialog
+  const [open, setOpen] = useState(false);
+  const [selectedAction, setSelectedAction] = useState(null);
+  const [selectedUserId, setSelectedUserId] = useState(null);
 
   const getJobs = async () => {
     try {
-      setLoading(true); // show loader
+      setLoading(true);
       const { data } = await axios.get(`${baseUrl}/users`);
       setUsers(data.users);
     } catch (err) {
       console.error("Error fetching jobs:", err);
     } finally {
-      setLoading(false); // hide loader
+      setLoading(false);
     }
   };
 
@@ -39,10 +47,10 @@ export default function MemberApprove() {
     getJobs();
   }, []);
 
-  const filteredJobs = users.filter(
-    (job) =>
-      (job.status || "inactive").toLowerCase() === statusFilter.toLowerCase()
-  );
+  const filteredJobs = users.filter((job) => {
+    if (statusFilter === "all") return true;
+    return job.status?.toLowerCase() === statusFilter.toLowerCase();
+  });
 
   const handleMemberStatus = async (status, userId) => {
     try {
@@ -52,7 +60,7 @@ export default function MemberApprove() {
         adminNotes: `All documents verified and ${status}`,
       };
       setLoading(true);
-      const response = await axios.put(`${baseUrl}/admin/approve-user`, body, {
+      await axios.put(`${baseUrl}/admin/approve-user`, body, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -69,8 +77,28 @@ export default function MemberApprove() {
     }
   };
 
-  const totalPages = Math.ceil(filteredJobs.length / PRODUCTS_PER_PAGE);
+  // Open confirmation dialog
+  const handleOpenConfirm = (action, userId) => {
+    setSelectedAction(action);
+    setSelectedUserId(userId);
+    setOpen(true);
+  };
 
+  // Handle confirm
+  const handleConfirm = () => {
+    if (selectedAction && selectedUserId) {
+      handleMemberStatus(selectedAction, selectedUserId);
+    }
+    setOpen(false);
+  };
+
+  const handleCancel = () => {
+    setOpen(false);
+    setSelectedAction(null);
+    setSelectedUserId(null);
+  };
+
+  const totalPages = Math.ceil(filteredJobs.length / PRODUCTS_PER_PAGE);
   const paginatedFilteredJobs = filteredJobs.slice(
     (currentPage - 1) * PRODUCTS_PER_PAGE,
     currentPage * PRODUCTS_PER_PAGE
@@ -86,30 +114,21 @@ export default function MemberApprove() {
       <ToastContainer />
 
       <div className="p-4 sm:p-6 flex-1 overflow-x-auto">
-        {/* Header with job count and controls */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-5">
-          {/* <div className="text-base sm:text-lg font-bold text-orange-500">
-            Total Members {users.length}
-          </div> */}
-
-          <h2 className="text-xl sm:text-2xl font-bold mb-4">Job List</h2>
-          <div className="flex flex-wrap gap-2">
-            {/* Search */}
-            <div className="flex flex-wrap gap-2">
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 w-full sm:w-auto"
-              >
-                <option value="approve">Approve</option>
-                <option value="reject">Reject</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </div>
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl sm:text-2xl font-bold mb-4">Total Members</h2>
+          <div className="flex flex-wrap gap-2 mb-5">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 w-full sm:w-auto"
+            >
+              <option value="all">All</option>
+              <option value="active">Active</option>
+              <option value="reject">Reject</option>
+            </select>
           </div>
         </div>
 
-        {/* Table container for responsiveness */}
         <div className="overflow-x-auto">
           <table className="table-auto w-full text-sm min-w-[600px]">
             <thead>
@@ -124,21 +143,20 @@ export default function MemberApprove() {
               </tr>
             </thead>
 
-            {loading && (
-              <div className="fixed top-[50%] left-[50%]">
-                <Box sx={{ display: "flex" }}>
-                  <CircularProgress />
-                </Box>
-              </div>
-            )}
-
             <tbody>
-              {paginatedFilteredJobs.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan="7" className="text-center py-10">
+                    <Box sx={{ display: "flex", justifyContent: "center" }}>
+                      <CircularProgress />
+                    </Box>
+                  </td>
+                </tr>
+              ) : paginatedFilteredJobs.length === 0 ? (
                 <tr>
                   <td
                     colSpan="7"
-                    className="text-center font-semibold py-6 sm:py-8 md:py-20 text-gray-500 
-               text-base sm:text-lg md:text-xl lg:text-lg"
+                    className="text-center font-semibold py-6 sm:py-8 md:py-20 text-gray-500 text-base sm:text-lg md:text-xl lg:text-lg"
                   >
                     No records found
                   </td>
@@ -151,48 +169,46 @@ export default function MemberApprove() {
                   >
                     <td className="px-4 py-2">
                       {job.firstName} {job.lastName}
-                      <p className=" text-green-900 text-[10px] font-semibold rounded-3xl transition duration-200">
+                      <p className=" text-green-900 text-[10px] font-semibold">
                         {job.emailAddress}
                       </p>
                     </td>
-                    <td className="px-4 py-2">
-                      <div className="flex flex-col">
-                        <div className="flex gap-2 items-center flex-wrap">
-                          <h1>{job.companyName}</h1>
-                        </div>
-                      </div>
-                    </td>
+                    <td className="px-4 py-2">{job.companyName}</td>
                     <td className="px-4 py-2">{job.address}</td>
-                    <td className="px-4 py-2">
-                      <div className="flex gap-1 flex-wrap">
-                        <h1>{job.phoneMobile}</h1>
-                        {/* <p className="bg-[#DEEFFC] hover:bg-blue-400 text-center text-blue-700 text-[8px] px-2 font-semibold rounded-3xl transition duration-200">
-                          {job.resolutionField}
-                        </p> */}
-                      </div>
-                    </td>
+                    <td className="px-4 py-2">{job.phoneMobile}</td>
                     <td className="px-4 py-2">{job.accreditedBy}</td>
                     <td className="px-4 py-2">{job.licenseNumber}</td>
                     <td className="px-4 py-2">
-                      {job.status == "inactive" ? (
+                      {job.status === "all" ? (
                         <div className="flex gap-3">
                           <button
-                            onClick={() =>
-                              handleMemberStatus("approve", job.id)
-                            }
-                            className="bg-orange-500 hover:bg-orange-600 text-white text-10px font-semibold px-3 py-1 rounded-md transition duration-200 w-full sm:w-auto"
+                            onClick={() => handleOpenConfirm("approve", job.id)}
+                            className="bg-orange-500 hover:bg-orange-600 text-white text-10px font-semibold px-3 py-1 rounded-md"
                           >
                             Approve
                           </button>
                           <button
-                            onClick={() => handleMemberStatus("reject", job.id)}
-                            className="bg-orange-500 hover:bg-orange-600 text-white text-10px font-semibold px-3 py-1 rounded-md transition duration-200 w-full sm:w-auto"
+                            onClick={() => handleOpenConfirm("reject", job.id)}
+                            className="bg-orange-500 hover:bg-orange-600 text-white text-10px font-semibold px-3 py-1 rounded-md"
                           >
                             Reject
                           </button>
                         </div>
                       ) : (
-                        <p className="bg-[#E0EEE0] hover:bg-green-400 text-center text-green-900 text-[8px] font-semibold px-2 rounded-3xl transition duration-200">
+                        <p
+                          className={`text-center text-[8px] font-semibold px-2 rounded-3xl transition duration-200
+                                ${
+                                  job.status === "active"
+                                    ? "bg-green-400 text-green-950"
+                                    : ""
+                                }
+                                 ${
+                                   job.status === "reject"
+                                     ? "bg-red-400 text-red-950"
+                                     : ""
+                                 }
+                              `}
+                        >
                           {job.status}
                         </p>
                       )}
@@ -205,28 +221,56 @@ export default function MemberApprove() {
         </div>
 
         {/* Pagination */}
-        <div className="flex justify-center sm:justify-end mt-5">
-          <Stack spacing={2}>
-            <Pagination
-              count={totalPages}
-              page={currentPage}
-              onChange={handlePageChange}
-              variant="outlined"
-              sx={{
-                "& .MuiPaginationItem-root.Mui-selected": {
-                  backgroundColor: "#f97316",
-                  color: "white",
-                  borderColor: "orange",
-                },
-                "& .MuiPaginationItem-root.Mui-selected:hover": {
-                  backgroundColor: "#ea580c",
-                  borderColor: "#ff8c00",
-                },
-              }}
-            />
-          </Stack>
-        </div>
+        {paginatedFilteredJobs.length > 0 && totalPages > 1 && (
+          <div className="flex justify-center sm:justify-end mt-5">
+            <Stack spacing={2}>
+              <Pagination
+                count={totalPages}
+                page={currentPage}
+                onChange={handlePageChange}
+                variant="outlined"
+                sx={{
+                  "& .MuiPaginationItem-root.Mui-selected": {
+                    backgroundColor: "#f97316",
+                    color: "white",
+                    borderColor: "orange",
+                  },
+                  "& .MuiPaginationItem-root.Mui-selected:hover": {
+                    backgroundColor: "#ea580c",
+                    borderColor: "#ff8c00",
+                  },
+                }}
+              />
+            </Stack>
+          </div>
+        )}
       </div>
+
+      {/* Confirmation Dialog */}
+      <Dialog
+        open={open}
+        onClose={handleCancel}
+        aria-labelledby="confirm-dialog-title"
+      >
+        <DialogTitle id="confirm-dialog-title">Confirm Action</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to{" "}
+            <span className="font-bold">{selectedAction}</span> this member?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancel}>Cancel</Button>
+          <Button
+            onClick={handleConfirm}
+            variant="contained"
+            color="warning"
+            autoFocus
+          >
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

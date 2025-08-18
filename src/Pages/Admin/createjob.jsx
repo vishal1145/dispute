@@ -22,8 +22,8 @@ export default function CreateJob() {
 
   const [loading, setLoading] = useState(false); // loader state
 
-  const [excelFile, setExcelFile] = useState(null);
-  const fileInputRef = useRef(null);
+  // const [excelFile, setExcelFile] = useState(null);
+  // const fileInputRef = useRef(null);
 
   const handleJobSchedule = () => {
     navigate("/admin/job-list");
@@ -49,18 +49,18 @@ export default function CreateJob() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleExcelUploadClick = () => {
-    fileInputRef.current.click(); // trigger hidden input
-  };
+  // const handleExcelUploadClick = () => {
+  //   fileInputRef.current.click(); // trigger hidden input
+  // };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setExcelFile(file);
-      toast.info(`Selected file: ${file.name}`);
-      // You can handle uploading the file here if needed
-    }
-  };
+  // const handleFileChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     setExcelFile(file);
+  //     toast.info(`Selected file: ${file.name}`);
+  //     // You can handle uploading the file here if needed
+  //   }
+  // };
 
   const isFormValid =
     jobDate &&
@@ -309,23 +309,23 @@ export default function CreateJob() {
             >
               Save Job
             </button>
-            <button
+            {/* <button
               type="button"
               onClick={handleExcelUploadClick}
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
             >
               Upload Excel
-            </button>
+            </button> */}
             <button
               type="button"
               onClick={handleJobSchedule}
-              className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100"
+              className="px-4 py-2 border border-gray-300 rounded cursor-pointer hover:bg-gray-100"
             >
               Cancel
             </button>
           </div>
 
-          <div className="w-full max-w-3xl mt-4 flex justify-start">
+          {/* <div className="w-full max-w-3xl mt-4 flex justify-start">
             <input
               type="file"
               accept=".xlsx,.xls"
@@ -338,7 +338,7 @@ export default function CreateJob() {
                 {excelFile.name}
               </span>
             )}
-          </div>
+          </div> */}
         </form>
       </div>
     </div>

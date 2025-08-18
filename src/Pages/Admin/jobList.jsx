@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
 import Header from "../../components/header";
-// import { FiFilter, FiPlus } from "react-icons/fi";
 import axios from "axios";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const PRODUCTS_PER_PAGE = 10;
 
@@ -18,21 +19,25 @@ export default function JobList() {
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState("");
   const [status, setStatus] = useState("");
+  const [excelFile, setExcelFile] = useState(null);
+  const fileInputRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
 
   // Fetch data from API when component mounts
+
+  const fetchJobs = async () => {
+    try {
+      setLoading(true); // show loader
+      const { data } = await axios.get(`${baseUrl}/admin/jobs/all`);
+      setAllJobList(data.jobs);
+      console.log("Jobs fetched:", data.jobs);
+    } catch (err) {
+      console.error("Error fetching jobs:", err);
+    } finally {
+      setLoading(false); // hide loader
+    }
+  };
   useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        setLoading(true); // show loader
-        const { data } = await axios.get(`${baseUrl}/jobs`);
-        setAllJobList(data.jobs);
-        console.log("Jobs fetched:", data.jobs);
-      } catch (err) {
-        console.error("Error fetching jobs:", err);
-      } finally {
-        setLoading(false); // hide loader
-      }
-    };
     fetchJobs();
   }, []);
 
@@ -69,6 +74,54 @@ export default function JobList() {
     setCurrentPage(value);
   };
 
+  const handleExcelUploadClick = () => {
+    fileInputRef.current.click(); // trigger hidden input
+  };
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setExcelFile(file);
+      uploadExcel(file);
+    }
+  };
+
+  // Upload file API
+  const uploadExcel = async (file) => {
+    const formData = new FormData();
+    formData.append("excel_file", file);
+
+    try {
+      setUploading(true);
+      const response = await axios.post(
+        `${baseUrl}/jobs/import-excel`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Cookie: "PHPSESSID=aam7r67kt704mgi5jnfil8nfl8",
+          },
+        }
+      );
+
+      console.log("Upload success:", response.data);
+      alert("Excel uploaded successfully!");
+    } catch (error) {
+      console.error("Upload failed:", error);
+      alert("Failed to upload Excel file");
+    } finally {
+      setUploading(false);
+    }
+  };
+  // const handleFileChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     setExcelFile(file);
+  //     toast.info(`Selected file: ${file.name}`);
+  //     // You can handle uploading the file here if needed
+  //   }
+  // };
+
   return (
     <div className="flex flex-col lg:flex-row h-[100vh]">
       <Header />
@@ -83,6 +136,15 @@ export default function JobList() {
           </div>
 
           <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={handleExcelUploadClick}
+              className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
+              disabled={uploading}
+            >
+              {uploading ? "Uploading..." : "Upload Excel"}
+            </button>
+
             <input
               type="text"
               placeholder="Search..."
@@ -91,13 +153,20 @@ export default function JobList() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
 
-            {/* <button className="flex items-center gap-1 border border-gray-300 rounded-md px-3 py-2 text-sm hover:bg-gray-100 w-full sm:w-auto justify-center">
-              <FiFilter /> Filter
-            </button> */}
-
-            {/* <button className="flex items-center gap-1 bg-orange-500 text-white rounded-md px-3 py-2 text-sm hover:bg-orange-600 w-full sm:w-auto justify-center">
-              <FiPlus /> Add User
-            </button> */}
+            <div className="w-full max-w-3xl mt-4 flex justify-start">
+              <input
+                type="file"
+                accept=".xlsx,.xls"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                style={{ display: "none" }}
+              />
+              {excelFile && (
+                <span className="ml-3 text-sm text-gray-700">
+                  {excelFile.name}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -112,23 +181,33 @@ export default function JobList() {
                 <th className="px-4 py-2">Duration</th>
                 <th className="px-4 py-2">Intake</th>
                 <th className="px-4 py-2">Remuneration</th>
+                <th className="px-4 py-2">Status</th>
+                <th className="px-4 py-2">Booked By</th>
                 {/* <th className="px-4 py-2">Action</th> */}
               </tr>
             </thead>
 
-            {loading && (
+            {/* {loading && (
               <div className="fixed top-[50%] left-[50%]">
                 <Box sx={{ display: "flex" }}>
                   <CircularProgress />
                 </Box>
               </div>
-            )}
+            )} */}
 
             <tbody>
-              {paginatedFilteredJobs.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan="8" className="text-center py-10">
+                    <Box sx={{ display: "flex", justifyContent: "center" }}>
+                      <CircularProgress />
+                    </Box>
+                  </td>
+                </tr>
+              ) : paginatedFilteredJobs.length === 0 ? (
                 <tr>
                   <td
-                    colSpan="7"
+                    colSpan="8"
                     className="text-center font-semibold py-6 sm:py-8 md:py-20 text-gray-500 
                text-base sm:text-lg md:text-xl lg:text-lg"
                   >
@@ -146,26 +225,55 @@ export default function JobList() {
                       <div className="flex flex-col">
                         <div className="flex gap-2 items-center flex-wrap">
                           <h1>{job.briefOverview}</h1>
-                          <p className="bg-[#E0EEE0] hover:bg-green-400 text-center text-green-900 text-[8px] font-semibold px-2 rounded-3xl transition duration-200">
-                            {job.status}
-                          </p>
                         </div>
-                        <p className="text-[10px]">{job.date}</p>
+                        <p className="text-[10px]">{job.jobDate}</p>
                       </div>
                     </td>
                     <td className="px-4 py-2">{job.venue}</td>
                     <td className="px-4 py-2">
                       <div className="flex gap-1 flex-wrap">
                         <h1>{job.duration}</h1>
-                        <p className="bg-[#DEEFFC] hover:bg-blue-400 text-center text-blue-700 text-[8px] px-2 font-semibold rounded-3xl transition duration-200">
+                        <p className="bg-blue-400 text-center text-blue-950 text-[8px] px-2 font-semibold rounded-3xl transition duration-200">
                           {job.resolutionField}
                         </p>
                       </div>
                     </td>
                     <td className="px-4 py-2">{job.intakeDetails}</td>
                     <td className="px-4 py-2">
-                      ${parseFloat(job.remuneration)}
+                      $ {parseFloat(job.remuneration).toLocaleString("en-US")}
                     </td>
+                    <td className="px-4 py-2">
+                      <div>
+                        <p
+                          className={`text-center text-[8px] font-semibold px-2 rounded-3xl transition duration-200
+                                ${
+                                  job.status === "Booked"
+                                    ? "bg-blue-400 text-blue-950"
+                                    : ""
+                                }
+                                ${
+                                  job.status === "Available"
+                                    ? "bg-yellow-400 text-yellow-950"
+                                    : ""
+                                }
+                                ${
+                                  job.status === "Completed"
+                                    ? "bg-green-400 text-green-950"
+                                    : ""
+                                }
+                                 ${
+                                   job.status === "Aborted"
+                                     ? "bg-red-400 text-red-950"
+                                     : ""
+                                 }
+                              `}
+                        >
+                          {job.status}
+                        </p>
+                      </div>
+                    </td>
+                    <td className="px-4 py-2">{job.userName}</td>
+
                     {/* <td className="px-4 py-2">
                     <button
                       onClick={() => bookedJobs(job.id)}
@@ -182,27 +290,29 @@ export default function JobList() {
         </div>
 
         {/* Pagination */}
-        <div className="flex justify-center sm:justify-end mt-5">
-          <Stack spacing={2}>
-            <Pagination
-              count={totalPages}
-              page={currentPage}
-              onChange={handlePageChange}
-              variant="outlined"
-              sx={{
-                "& .MuiPaginationItem-root.Mui-selected": {
-                  backgroundColor: "#f97316",
-                  color: "white",
-                  borderColor: "orange",
-                },
-                "& .MuiPaginationItem-root.Mui-selected:hover": {
-                  backgroundColor: "#ea580c",
-                  borderColor: "#ff8c00",
-                },
-              }}
-            />
-          </Stack>
-        </div>
+        {paginatedFilteredJobs.length > 0 && totalPages > 1 && (
+          <div className="flex justify-center sm:justify-end mt-5">
+            <Stack spacing={2}>
+              <Pagination
+                count={totalPages}
+                page={currentPage}
+                onChange={handlePageChange}
+                variant="outlined"
+                sx={{
+                  "& .MuiPaginationItem-root.Mui-selected": {
+                    backgroundColor: "#f97316",
+                    color: "white",
+                    borderColor: "orange",
+                  },
+                  "& .MuiPaginationItem-root.Mui-selected:hover": {
+                    backgroundColor: "#ea580c",
+                    borderColor: "#ff8c00",
+                  },
+                }}
+              />
+            </Stack>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -5,9 +5,9 @@ import { NavLink } from "react-router-dom";
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
-  const logout = async () => {
-    window.location.href = "https://disputesresolutions.com";
-  };
+  // const logout = async () => {
+  //   window.location.href = "https://disputesresolutions.com";
+  // };
 
   return (
     <>
@@ -59,7 +59,7 @@ export default function Navbar() {
                 : "text-white hover:text-orange-400"
             }
           >
-            Job List
+            Jobs
           </NavLink>
 
           <NavLink
@@ -70,7 +70,7 @@ export default function Navbar() {
                 : "text-white hover:text-orange-400"
             }
           >
-            Create Jobs
+            Create Job
           </NavLink>
 
           <NavLink
@@ -81,12 +81,12 @@ export default function Navbar() {
                 : "text-white hover:text-orange-400"
             }
           >
-            Member Approve
+            Members
           </NavLink>
         </div>
 
         {/* Log Out */}
-        <div className="mt-auto text-left px-6">
+        {/* <div className="mt-auto text-left px-6">
           <NavLink
             onClick={logout}
             className={({ isActive }) =>
@@ -97,7 +97,7 @@ export default function Navbar() {
           >
             Log Out
           </NavLink>
-        </div>
+        </div> */}
       </div>
 
       {/* Overlay for mobile */}
