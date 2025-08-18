@@ -1,0 +1,10 @@
+[
+  { "label": "First Name", "type": "text", "name": "firstName" },
+  { "label": "Last Name", "type": "text", "name": "lastName" },
+  { "label": "Email address", "type": "email", "name": "email" },
+  { "label": "Password", "type": "password", "name": "password" },
+  { "label": "Company Name", "type": "text", "name": "company", "placeholder": "If applicable" },
+  { "label": "Address", "type": "textarea", "name": "address" },
+  { "label": "Phone (Mobile)", "type": "tel", "name": "phone" },
+  { "label": "Additional Information", "type": "textarea", "name": "additional", "placeholder": "degrees, professions, areas of expertise, lawyer etc" }
+]

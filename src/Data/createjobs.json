@@ -1,0 +1,56 @@
+[
+  {
+    "label": "User ID",
+    "name": "userId",
+    "type": "text",
+    "placeholder": "USR-2024-001"
+  },
+  {
+    "label": "Job Date",
+    "name": "jobDate",
+    "type": "date",
+    "placeholder": ""
+  },
+  {
+    "label": "Resolution Type",
+    "name": "resolutionType",
+    "type": "select",
+    "options": ["Mediation", "Arbitration", "Negotiation"]
+  },
+  {
+    "label": "Venue",
+    "name": "venue",
+    "type": "text",
+    "placeholder": "Enter venue"
+  },
+  {
+    "label": "Duration",
+    "name": "duration",
+    "type": "select",
+    "options": ["1 hour", "2 hours", "Half day", "Full day"]
+  },
+  {
+    "label": "Remuneration",
+    "name": "remuneration",
+    "type": "number",
+    "placeholder": "Enter amount"
+  },
+  {
+    "label": "Brief Overview",
+    "name": "overview",
+    "type": "textarea",
+    "placeholder": "Enter a brief overview of the job..."
+  },
+  {
+    "label": "Intake Details",
+    "name": "intakeDetails",
+    "type": "textarea",
+    "placeholder": "Provide detailed information about the job..."
+  },
+  {
+    "label": "Status",
+    "name": "status",
+    "type": "select",
+    "options": ["Available", "In Progress", "Completed"]
+  }
+]

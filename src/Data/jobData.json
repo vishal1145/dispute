@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "date": "Tuesday 29/10/2024",
+    "resolutionField": "Conciliation",
+    "venue": "Live – Melbourne Venue provided",
+    "duration": "Full day (up to 8 hours)",
+    "briefOverview": "Building Contract",
+    "intake": "To be done by Conciliator",
+    "remuneration": "$2200",
+    "status": "Available",
+    "action": "Book"
+  },
+  {
+    "id": 2,
+    "date": "Sunday 20/10/2024",
+    "resolutionField": "Mediation",
+    "venue": "Online",
+    "duration": "Full day (up to 8 hours)",
+    "briefOverview": "Workplace",
+    "intake": "Completed - details & documents will be sent to you",
+    "remuneration": "$1500",
+    "status": "Available",
+    "action": "Book"
+  },
+  {
+    "id": 3,
+    "date": "Wednesday 16/10/2024",
+    "resolutionField": "Arbitration",
+    "venue": "Online",
+    "duration": "½ day (up to 4 hours)",
+    "briefOverview": "Insurance",
+    "intake": "Completed - details & documents will be sent to you",
+    "remuneration": "$1400",
+    "status": "Available",
+    "action": "Book"
+  },
+    {
+    "id": 4,
+    "date": "Tuesday 29/10/2024",
+    "resolutionField": "Conciliation",
+    "venue": "Live – Melbourne Venue provided",
+    "duration": "Full day (up to 8 hours)",
+    "briefOverview": "Building Contract",
+    "intake": "To be done by Conciliator",
+    "remuneration": "$2200",
+    "status": "Available",
+    "action": "Book"
+  },
+  {
+    "id": 5,
+    "date": "Sunday 20/10/2024",
+    "resolutionField": "Mediation",
+    "venue": "Online",
+    "duration": "Full day (up to 8 hours)",
+    "briefOverview": "Workplace",
+    "intake": "Completed - details & documents will be sent to you",
+    "remuneration": "$1500",
+    "status": "Available",
+    "action": "Book"
+  },
+  {
+    "id": 6,
+    "date": "Wednesday 16/10/2024",
+    "resolutionField": "Arbitration",
+    "venue": "Online",
+    "duration": "½ day (up to 4 hours)",
+    "briefOverview": "Insurance",
+    "intake": "Completed - details & documents will be sent to you",
+    "remuneration": "$1400",
+    "status": "Available",
+    "action": "Book"
+  }
+]

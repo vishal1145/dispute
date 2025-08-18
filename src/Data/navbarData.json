@@ -1,0 +1,18 @@
+{
+  "admin": [
+    { "label": "Account", "href": "/account", "highlight": "orange", "bold": false },
+    { "label": "Create Jobs", "href": "/createJobs", "highlight": "white", "bold": false },
+    { "label": "Job List", "href": "/jobList", "highlight": "white", "bold": false },
+    { "label": "Member Approve", "href": "/memberApprove", "highlight": "white", "bold": false },
+    { "label": "Log Out", "href": "/logout", "highlight": "white", "bold": false, "bottom": true }
+  ],
+  "member": [
+    { "label": "Hello", "href": "#", "highlight": "orange", "bold": false },
+    { "label": "Dashboard", "href": "/", "highlight": "white", "bold": true },
+    { "label": "Job Schedule", "href": "/jobSchedule", "highlight": "white", "bold": false },
+    { "label": "My Current Jobs", "href": "/myCurrentJobs", "highlight": "white", "bold": false },
+    { "label": "My Completed Jobs", "href": "/myCompletedJobs", "highlight": "white", "bold": false },
+    { "label": "My Account", "href": "/myAccount", "highlight": "orange", "bold": false },
+    { "label": "Log Out", "href": "/logout", "highlight": "white", "bold": false, "bottom": true }
+  ]
+}
