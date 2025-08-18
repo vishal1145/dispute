@@ -8,7 +8,7 @@ import Box from "@mui/material/Box";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import { useSearchParams } from "react-router-dom";
 // import { FiFilter, FiPlus } from "react-icons/fi";
 
 const PRODUCTS_PER_PAGE = 10;
@@ -19,8 +19,13 @@ export default function MemberApprove() {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [getJob, setGetJob] = useState([]);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [selectedAction, setSelectedAction] = useState("");
 
   // Fetch data from API when component mounts
+  const [searchParams] = useSearchParams();   // ✅ Get query params
+    const userId = searchParams.get("userId");
   const getJobs = async () => {
     try {
       setLoading(true); // show loader
@@ -37,10 +42,34 @@ export default function MemberApprove() {
       setLoading(false); // hide loader
     }
   };
-
+  useEffect(() => {
+      if (userId) {
+        localStorage.setItem("userId", userId);
+        console.log("Saved userId:", userId);
+      }
+    }, [userId]);
   useEffect(() => {
     getJobs();
   }, []);
+
+  const openConfirmModal = (job, action) => {
+    setSelectedJob(job);
+    setSelectedAction(action);
+    setShowConfirmModal(true);
+  };
+
+  const closeConfirmModal = () => {
+    setShowConfirmModal(false);
+    setSelectedJob(null);
+    setSelectedAction("");
+  };
+
+  const confirmAction = async () => {
+    if (selectedJob && selectedAction) {
+      closeConfirmModal(); // Close modal immediately when action starts
+      await completedJobs(selectedJob.id, selectedAction);
+    }
+  };
 
   const completedJobs = async (jobId, action) => {
     try {
@@ -129,16 +158,16 @@ export default function MemberApprove() {
               </tr>
             </thead>
 
-            {loading && (
-              <div className="fixed top-[50%] left-[50%]">
-                <Box sx={{ display: "flex" }}>
-                  <CircularProgress />
-                </Box>
-              </div>
-            )}
-
             <tbody>
-              {paginatedFilteredJobs.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan="7" className="text-center py-8">
+                    <Box sx={{ display: "flex", justifyContent: "center" }}>
+                      <CircularProgress />
+                    </Box>
+                  </td>
+                </tr>
+              ) : paginatedFilteredJobs.length === 0 ? (
                 <tr>
                   <td
                     colSpan="7"
@@ -176,17 +205,21 @@ export default function MemberApprove() {
                       </div>
                     </td>
                     <td className="px-4 py-2">{job.intake}</td>
-                    <td className="px-4 py-2">{job.remuneration}</td>
+                    <td className="px-4 py-2">
+                      <div className="font-medium">
+                        $ {parseInt(job.remuneration || 0).toLocaleString()}
+                      </div>
+                    </td>
                     <td className="px-4 py-2">
                       <div className="flex gap-3">
                         <button
-                          onClick={() => completedJobs(job.id, "Completed")}
+                          onClick={() => openConfirmModal(job, "Completed")}
                           className="bg-orange-500 hover:bg-orange-600 text-white text-10px font-semibold px-3 py-1 rounded-md transition duration-200 w-full sm:w-auto"
                         >
                           Completed
                         </button>
                         <button
-                          onClick={() => completedJobs(job.id, "Aborted")}
+                          onClick={() => openConfirmModal(job, "Aborted")}
                           className="bg-orange-500 hover:bg-orange-600 text-white text-10px font-semibold px-3 py-1 rounded-md transition duration-200 w-full sm:w-auto"
                         >
                           Aborted
@@ -223,6 +256,32 @@ export default function MemberApprove() {
           </Stack>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      {showConfirmModal && selectedJob && selectedAction && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+            <h3 className="text-lg font-bold mb-4">Confirm Action</h3>
+            <p className="text-sm mb-4">
+              Are you sure you want to {selectedAction} this job?
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={closeConfirmModal}
+                className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmAction}
+                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

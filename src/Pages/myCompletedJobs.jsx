@@ -7,6 +7,7 @@ import Stack from "@mui/material/Stack";
 import axios from "axios";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
+import { useSearchParams } from "react-router-dom";  
 
 const PRODUCTS_PER_PAGE = 10;
 
@@ -14,7 +15,8 @@ export default function MyCompletedJobs() {
   const baseUrl = process.env.REACT_APP_Base_Url;
   const [completedJobs, setCompletedJobs] = useState([]);
   const [loading, setLoading] = useState(false);
-
+const [searchParams] = useSearchParams();   // ✅ Get query params
+  const userId = searchParams.get("userId");
   const myJobs = async () => {
     try {
       setLoading(true); // show loader
@@ -27,6 +29,13 @@ export default function MyCompletedJobs() {
       setLoading(false); // hide loader
     }
   };
+  useEffect(() => {
+      if (userId) {
+        localStorage.setItem("userId", userId);
+        console.log("Saved userId:", userId);
+      }
+    }, [userId]);
+  
   useEffect(() => {
     myJobs();
   }, []);
@@ -97,16 +106,16 @@ export default function MyCompletedJobs() {
               </tr>
             </thead>
 
-            {loading && (
-              <div className="fixed top-[50%] left-[50%]">
-                <Box sx={{ display: "flex" }}>
-                  <CircularProgress />
-                </Box>
-              </div>
-            )}
-
             <tbody>
-              {paginatedFilteredJobs.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan="6" className="text-center py-8">
+                    <Box sx={{ display: "flex", justifyContent: "center" }}>
+                      <CircularProgress />
+                    </Box>
+                  </td>
+                </tr>
+              ) : paginatedFilteredJobs.length === 0 ? (
                 <tr>
                   <td
                     colSpan="7"
@@ -148,7 +157,11 @@ export default function MyCompletedJobs() {
                       </div>
                     </td>
                     <td className="px-4 py-2">{job.intakeDetails}</td>
-                    <td className="px-4 py-2">{job.remuneration}</td>
+                    <td className="px-4 py-2">
+                      <div className="font-medium">
+                        $ {parseInt(job.remuneration || 0).toLocaleString()}
+                      </div>
+                    </td>
                   </tr>
                 ))
               )}

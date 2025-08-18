@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
 import Navbar from "../components/navbar";
+import { useSearchParams } from "react-router-dom";
 // import { FiFilter, FiPlus } from "react-icons/fi";
 import axios from "axios";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -18,10 +19,20 @@ export default function JobList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [userId, setUserId] = useState("");
+  // const [userId, setUserId] = useState("");
   const [status, setStatus] = useState("");
-
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [searchParams] = useSearchParams();   // ✅ Get query params
+  const userId = searchParams.get("userId");
   // Fetch data from API when component mounts
+  useEffect(() => {
+    if (userId) {
+      localStorage.setItem("userId", userId);
+      console.log("Saved userId:", userId);
+    }
+  }, [userId]);
+
   useEffect(() => {
     fetchJobs();
   }, []);
@@ -36,6 +47,23 @@ export default function JobList() {
       console.error("Error fetching jobs:", err);
     } finally {
       setLoading(false); // hide loader
+    }
+  };
+
+  const openConfirmModal = (job) => {
+    setSelectedJob(job);
+    setShowConfirmModal(true);
+  };
+
+  const closeConfirmModal = () => {
+    setShowConfirmModal(false);
+    setSelectedJob(null);
+  };
+
+  const confirmBookJob = async () => {
+    if (selectedJob) {
+      closeConfirmModal(); // Close modal immediately when action starts
+      await bookedJobs(selectedJob.id);
     }
   };
 
@@ -126,16 +154,16 @@ export default function JobList() {
               </tr>
             </thead>
 
-            {loading && (
-              <div className="fixed top-[50%] left-[50%]">
-                <Box sx={{ display: "flex" }}>
-                  <CircularProgress />
-                </Box>
-              </div>
-            )}
-
             <tbody>
-              {paginatedFilteredJobs.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan="7" className="text-center py-8">
+                    <Box sx={{ display: "flex", justifyContent: "center" }}>
+                      <CircularProgress />
+                    </Box>
+                  </td>
+                </tr>
+              ) : paginatedFilteredJobs.length === 0 ? (
                 <tr>
                   <td
                     colSpan="7"
@@ -173,11 +201,15 @@ export default function JobList() {
                       </div>
                     </td>
                     <td className="px-4 py-2">{job.intakeDetails}</td>
-                    <td className="px-4 py-2">{job.remuneration}</td>
+                    <td className="px-4 py-2">
+                      <div className="font-medium">
+                        $ {parseInt(job.remuneration || 0).toLocaleString()}
+                      </div>
+                    </td>
                     <td className="px-4 py-2">
                       <div>
                         <button
-                          onClick={() => bookedJobs(job.id)}
+                          onClick={() => openConfirmModal(job)}
                           className="w-full rounded px-2 py-1 bg-orange-500 text-white hover:bg-orange-600 transition"
                         >
                           Book
@@ -214,6 +246,32 @@ export default function JobList() {
           </Stack>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      {showConfirmModal && selectedJob && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+            <h3 className="text-lg font-bold mb-4">Confirm Booking</h3>
+            <p className="text-sm mb-4">
+              Are you sure you want to book the job titled: "{selectedJob.briefOverview}"?
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={closeConfirmModal}
+                className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmBookJob}
+                className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
