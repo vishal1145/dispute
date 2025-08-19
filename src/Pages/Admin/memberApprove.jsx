@@ -168,7 +168,7 @@ export default function MemberApprove() {
                     className="hover:bg-gray-50 border-b border-b-gray-300 text-[12px]"
                   >
                     <td className="px-4 py-2">
-                      {job.firstName} {job.lastName}
+                      {job.firstName.charAt(0).toUpperCase() + job.status.slice(1)}  {job.lastName.charAt(0).toUpperCase() + job.status.slice(1)}
                       <p className=" text-green-900 text-[10px] font-semibold">
                         {job.emailAddress}
                       </p>
@@ -209,7 +209,7 @@ export default function MemberApprove() {
                                  }
                               `}
                         >
-                          {job.status}
+                          {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
                         </p>
                       )}
                     </td>

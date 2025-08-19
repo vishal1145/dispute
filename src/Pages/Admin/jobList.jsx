@@ -37,6 +37,7 @@ export default function JobList() {
       setLoading(false); // hide loader
     }
   };
+
   useEffect(() => {
     fetchJobs();
   }, []);
@@ -130,7 +131,7 @@ export default function JobList() {
         <h2 className="text-xl sm:text-2xl font-bold mb-4">Job List</h2>
 
         {/* Header with job count and controls */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-5">
+        <div className="flex flex-col items-center sm:flex-row sm:justify-between sm:items-center gap-3 mb-5">
           <div className="text-base sm:text-lg font-bold text-orange-500">
             Total Jobs {allJobLists?.length}
           </div>

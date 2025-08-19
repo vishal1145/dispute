@@ -11,7 +11,7 @@ export default function CreateJob() {
   const [jobDate, setJobDate] = useState("");
   const [resolutionField, setResolutionField] = useState("");
   const [venue, setVenue] = useState("");
-  const [remuneration, setRemuneration] = useState("");
+  const [remuneration, setRemuneration] = useState(null);
   const [duration, setDuration] = useState("");
   const [briefOverview, setBriefOverview] = useState("");
   const [intakeDetails, setIntakeDetails] = useState("");
@@ -232,8 +232,8 @@ export default function CreateJob() {
               <option value="Full day (up to 8 hours)">
                 Full day (up to 8 hours)
               </option>
-              <option value="1/2 day (up to 4 hours)">
-                1/2 day (up to 4 hours)
+              <option value="Half day (up to 4 hours)">
+                Half day (up to 4 hours)
               </option>
             </select>
             {errors.duration && (
