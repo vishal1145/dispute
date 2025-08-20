@@ -7,9 +7,9 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
-  const logout = async () => {
-    window.location.href = "https://disputesresolutions.com";
-  };
+  // const logout = async () => {
+  //   window.location.href = "https://disputesresolutions.com";
+  // };
 
   return (
     <>
@@ -101,7 +101,7 @@ export default function Navbar() {
         </div>
 
         {/* Log Out */}
-        <div className="mt-auto text-left px-6">
+        {/* <div className="mt-auto text-left px-6">
           <NavLink
             onClick={logout}
             className={({ isActive }) =>
@@ -112,7 +112,7 @@ export default function Navbar() {
           >
             Log Out
           </NavLink>
-        </div>
+        </div> */}
       </div>
 
       {/* Overlay for mobile */}
