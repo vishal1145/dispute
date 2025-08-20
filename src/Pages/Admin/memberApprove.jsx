@@ -181,7 +181,7 @@ export default function MemberApprove() {
                       <td className="px-4 py-3 align-top text-gray-700">{job.licenseNumber || "-"}</td>
 
                       <td className="px-4 py-3 align-top">
-                        {job.status === "all" || job.status === "pending" ? (
+                        {job.status === "inactive" ? (
                           <div className="flex gap-2">
                             <button
                               onClick={() =>
