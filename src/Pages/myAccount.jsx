@@ -195,7 +195,7 @@ export default function MyAccount() {
             </div>
           )}
           
-          <p className="mb-4 text-lg sm:text-xl font-bold">
+          <p className="text-xl sm:text-2xl font-bold mb-4 text-gray-600">
             If required, please update your details and click the Update button.
           </p>
 
@@ -205,7 +205,7 @@ export default function MyAccount() {
                 key={index}
                 className={`${field.fullWidth ? "sm:col-span-2" : ""}`}
               >
-                <label className="block text-sm font-medium mb-1">
+                <label className="block text-xs uppercase tracking-wide font-medium mb-2 text-gray-600">
                   {field.label}
                 </label>
 
@@ -216,7 +216,7 @@ export default function MyAccount() {
                     onChange={handleInputChange}
                     placeholder={field.placeholder || ""}
                     rows="1"
-                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-orange-500 resize-y"
+                    className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
                   ></textarea>
                 ) : (
                   <input
@@ -225,18 +225,18 @@ export default function MyAccount() {
                     value={formData[field.name] || ""}
                     onChange={handleInputChange}
                     placeholder={field.placeholder || ""}
-                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 )}
               </div>
             ))}
 
             {/* Button Row */}
-            <div className="col-span-1 sm:col-span-2 flex justify-center sm:justify-start">
+            <div className="col-span-1 sm:col-span-2 flex justify-center sm:justify-start mt-6">
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white font-semibold px-6 py-2 rounded transition duration-200"
+                className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white text-sm font-medium px-6 py-3 rounded-lg transition-colors"
               >
                 Update
               </button>

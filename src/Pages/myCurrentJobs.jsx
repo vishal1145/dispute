@@ -108,16 +108,16 @@ export default function MemberApprove() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen">
+    <div className="flex flex-col lg:flex-row h-screen">
       <Navbar />
       <ToastContainer />
 
-      <div className="p-4 sm:p-6 flex-1 overflow-x-auto">
-        <h2 className="text-xl sm:text-2xl font-bold mb-4">My Current Jobs</h2>
+      <div className="p-4 sm:p-6 flex-1 overflow-y-auto">
+        <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-600">My Current Jobs</h2>
 
         {/* Header with job count and controls */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-5">
-          <div className="text-base sm:text-lg font-bold text-orange-500">
+          <div className="text-base font-medium text-gray-600">
             Total Jobs {getJob.length}
           </div>
 
@@ -198,12 +198,12 @@ export default function MemberApprove() {
                     <td className="px-4 py-3 align-top">
                       <div className="flex flex-col gap-1">
                         <div className="font-medium text-gray-900">{job.duration}</div>
-                        <span className="bg-blue-100 text-blue-700 text-[10px] px-1 py-1 rounded-full font-medium">
+                        <span className="bg-blue-100 text-blue-700 text-[10px] px-2 py-1 rounded-full font-medium inline-block w-fit">
                           {job.resolutionField}
                         </span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 align-top text-gray-700">{job.intake}</td>
+                    <td className="px-4 py-3 align-top text-gray-700">{job.intakeDetails || job.intake || "-"}</td>
                     <td className="px-4 py-3 align-top text-gray-900 font-medium">
                       $ {parseInt(job.remuneration || 0).toLocaleString()}
                     </td>

@@ -58,19 +58,19 @@ const [searchParams] = useSearchParams();   // ✅ Get query params
   };
 
   return (
-    <div className="flex flex-col md:flex-row">
+    <div className="flex flex-col md:flex-row h-screen">
       <Navbar />
 
-      <div className="p-4 md:p-6 w-full">
+      <div className="p-4 md:p-6 w-full overflow-y-auto">
         {/* Header */}
-        <h2 className="text-lg md:text-xl font-semibold mb-4">
+        <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-600">
           My Completed Jobs
         </h2>
 
         {/* Top controls */}
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-5">
-          <div className="text-lg md:text-[20px] font-bold text-orange-500">
-            <h1>Total Jobs {completedJobs.length}</h1>
+          <div className="text-base font-medium text-gray-600">
+            Total Jobs {completedJobs.length}
           </div>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
@@ -93,16 +93,16 @@ const [searchParams] = useSearchParams();   // ✅ Get query params
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="table-auto w-full text-xs sm:text-sm">
+        <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
+          <table className="w-full text-sm border-collapse">
             <thead>
-              <tr className="bg-gray-100 text-left border-b border-b-gray-300">
-                <th className="px-4 py-2">Job ID</th>
-                <th className="px-4 py-2">Brief Overview</th>
-                <th className="px-4 py-2">Venue</th>
-                <th className="px-4 py-2">Duration</th>
-                <th className="px-4 py-2">Intake Details</th>
-                <th className="px-4 py-2">Remuneration</th>
+              <tr className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-600">
+                <th className="px-4 py-3 border-b border-gray-200">Job ID</th>
+                <th className="px-4 py-3 border-b border-gray-200">Brief Overview</th>
+                <th className="px-4 py-3 border-b border-gray-200">Venue</th>
+                <th className="px-4 py-3 border-b border-gray-200">Duration</th>
+                <th className="px-4 py-3 border-b border-gray-200">Intake Details</th>
+                <th className="px-4 py-3 border-b border-gray-200">Remuneration</th>
               </tr>
             </thead>
 
@@ -129,38 +129,31 @@ const [searchParams] = useSearchParams();   // ✅ Get query params
                 paginatedFilteredJobs.map((job) => (
                   <tr
                     key={job.id}
-                    className="hover:bg-gray-50 border-b text-[12px] border-gray-300"
+                    className="hover:bg-gray-50 border-b border-gray-200 text-sm"
                   >
-                    <td className="px-4 py-2">{job.id}</td>
-                    <td className="px-4 py-2">
-                      <div className="flex flex-col ">
-                        <div className="flex gap-2 text-center">
-                          <div>
-                            <h1>{job.briefOverview}</h1>
-                          </div>
-                          <div className="bg-[#E0EEE0] hover:bg-green-400 text-center text-green-900 text-[8px] font-semibold px-2 rounded-3xl transition duration-200">
-                            <p>{job.status}</p>
-                          </div>
+                    <td className="px-4 py-3 align-top text-gray-900">{job.id}</td>
+                    <td className="px-4 py-3 align-top">
+                      <div className="flex flex-col">
+                        <div className="font-medium text-gray-900">
+                          {job.briefOverview}
                         </div>
-                        <div>
-                          <h1 className="text-[10px]">{job.jobDate}</h1>
+                        <div className="text-[10px] text-gray-500 mt-1">
+                          {job.jobDate}
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-2">{job.venue}</td>
-                    <td className="px-4 py-2">
-                      <div className="flex gap-1 flex-wrap">
-                        <span>{job.duration}</span>
-                        <span className="bg-[#DEEFFC] hover:bg-blue-400 text-blue-700 text-[8px] px-2 font-semibold rounded-3xl transition duration-200">
+                    <td className="px-4 py-3 align-top text-gray-700">{job.venue}</td>
+                    <td className="px-4 py-3 align-top">
+                      <div className="flex flex-col gap-1">
+                        <div className="font-medium text-gray-900">{job.duration}</div>
+                        <span className="bg-blue-100 text-blue-700 text-[10px] px-2 py-1 rounded-full font-medium inline-block w-fit">
                           {job.resolutionField}
                         </span>
                       </div>
                     </td>
-                    <td className="px-4 py-2">{job.intakeDetails}</td>
-                    <td className="px-4 py-2">
-                      <div className="font-medium">
-                        $ {parseInt(job.remuneration || 0).toLocaleString()}
-                      </div>
+                    <td className="px-4 py-3 align-top text-gray-700">{job.intakeDetails}</td>
+                    <td className="px-4 py-3 align-top text-gray-900 font-medium">
+                      $ {parseInt(job.remuneration || 0).toLocaleString()}
                     </td>
                   </tr>
                 ))
