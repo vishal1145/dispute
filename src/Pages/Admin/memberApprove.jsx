@@ -99,7 +99,7 @@ export default function MemberApprove() {
   const handlePageChange = (_e, value) => setCurrentPage(value);
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen">
+    <div className="flex flex-col lg:flex-row h-[100vh]">
       <Header />
       <ToastContainer />
 

@@ -17,7 +17,7 @@ export default function JobList() {
   const [excelFile, setExcelFile] = useState(null);
   const fileInputRef = useRef(null);
   const [uploading, setUploading] = useState(false); // button text only
-const SAMPLE_URL = `${process.env.PUBLIC_URL}/sample-posts (1) (2).xlsx`;
+  const SAMPLE_URL = `${process.env.PUBLIC_URL}/sample-posts (1) (2).xlsx`;
   const fetchJobs = async () => {
     try {
       setLoading(true);
@@ -63,8 +63,6 @@ const SAMPLE_URL = `${process.env.PUBLIC_URL}/sample-posts (1) (2).xlsx`;
 
   const handlePageChange = (_e, value) => setCurrentPage(value);
   const handleExcelUploadClick = () => fileInputRef.current?.click();
-  
-
 
   const handleFileChange = (event) => {
     const file = event.target.files?.[0];
@@ -84,7 +82,6 @@ const SAMPLE_URL = `${process.env.PUBLIC_URL}/sample-posts (1) (2).xlsx`;
       });
       await fetchJobs();
       setCurrentPage(1);
-
     } catch (error) {
       console.error("Upload failed:", error);
     } finally {
@@ -112,25 +109,31 @@ const SAMPLE_URL = `${process.env.PUBLIC_URL}/sample-posts (1) (2).xlsx`;
       <Header />
 
       <div className="p-4 sm:p-6 flex-1 overflow-x-auto">
-        <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-600">Job List</h2>
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-600">
+          Job List
+        </h2>
 
         {/* Top controls */}
         <div className="flex flex-col items-center sm:flex-row sm:justify-between sm:items-center gap-3 mb-5">
-          <div className="text-base sm:text-lg font-bold text-orange-500">
+          <div className="text-[16px] font-medium text-gray-700">
             Total Jobs {allJobLists?.length || 0}
           </div>
 
           <div className="flex flex-wrap gap-2 items-center">
             {/* Download sample */}
-            
-<a
-  href={SAMPLE_URL}
-  download="sample-posts (1) (2).xlsx"
-  className="text-gray-600 underline hover:text-gray-800 transition-colors"
-  style={{ textDecoration: 'underline', color: 'gray', border: 'none' }}
->
-  Download Sample File
-</a>
+
+            <a
+              href={SAMPLE_URL}
+              download="sample-posts (1) (2).xlsx"
+              className="text-gray-600 underline hover:text-gray-800 transition-colors"
+              style={{
+                textDecoration: "underline",
+                color: "gray",
+                border: "none",
+              }}
+            >
+              Download Sample File
+            </a>
             {/* Upload */}
             <button
               type="button"
@@ -140,8 +143,6 @@ const SAMPLE_URL = `${process.env.PUBLIC_URL}/sample-posts (1) (2).xlsx`;
             >
               {uploading ? "Uploading..." : "Upload Excel"}
             </button>
-            
-
 
             <input
               type="text"
@@ -163,26 +164,35 @@ const SAMPLE_URL = `${process.env.PUBLIC_URL}/sample-posts (1) (2).xlsx`;
               style={{ display: "none" }}
             />
             {excelFile && (
-                <span className="ml-3 text-sm text-gray-700">
-                  {excelFile.name}
-                </span>
+              <span className="ml-3 text-sm text-gray-700">
+                {excelFile.name}
+              </span>
             )}
           </div>
         </div>
 
         {/* Table */}
         <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
-          <table className="w-full text-sm border-collapse" style={{ minWidth: '900px' }}>
+          <table
+            className="w-full text-sm border-collapse"
+            style={{ minWidth: "900px" }}
+          >
             <thead>
               <tr className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-600">
                 <th className="px-4 py-3 border-b border-gray-200">Job Id</th>
-                <th className="px-4 py-3 border-b border-gray-200">Brief Overview</th>
+                <th className="px-4 py-3 border-b border-gray-200">
+                  Brief Overview
+                </th>
                 <th className="px-4 py-3 border-b border-gray-200">Venue</th>
                 <th className="px-4 py-3 border-b border-gray-200">Duration</th>
                 <th className="px-4 py-3 border-b border-gray-200">Intake</th>
-                <th className="px-4 py-3 border-b border-gray-200">Remuneration</th>
+                <th className="px-4 py-3 border-b border-gray-200">
+                  Remuneration
+                </th>
                 <th className="px-4 py-3 border-b border-gray-200">Status</th>
-                <th className="px-4 py-3 border-b border-gray-200">Booked By</th>
+                <th className="px-4 py-3 border-b border-gray-200">
+                  Booked By
+                </th>
               </tr>
             </thead>
 
@@ -210,16 +220,18 @@ const SAMPLE_URL = `${process.env.PUBLIC_URL}/sample-posts (1) (2).xlsx`;
                     className="text-center font-semibold py-6 sm:py-8 md:py-20 text-gray-500 
                text-base sm:text-lg md:text-xl lg:text-lg"
                   >
-            No record found
+                    No record found
                   </td>
                 </tr>
-        ) : (
+              ) : (
                 paginatedFilteredJobs?.map((job, index) => (
                   <tr
                     key={index}
                     className="hover:bg-gray-50 border-b border-gray-200 text-sm"
                   >
-                    <td className="px-4 py-3 align-top text-gray-900">{job.id}</td>
+                    <td className="px-4 py-3 align-top text-gray-900">
+                      {job.id}
+                    </td>
                     <td className="px-4 py-3 align-top">
                       <div className="flex flex-col">
                         <div className="font-medium text-gray-900">
@@ -230,16 +242,24 @@ const SAMPLE_URL = `${process.env.PUBLIC_URL}/sample-posts (1) (2).xlsx`;
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 align-top text-gray-700">{job.venue}</td>
+                    <td className="px-4 py-3 align-top text-gray-700">
+                      {job.venue}
+                    </td>
                     <td className="px-4 py-3 align-top">
                       <div className="flex flex-col gap-1">
-                        <div className="font-medium text-gray-900">{job.duration}</div>
-                        <span className="bg-blue-100 text-blue-700 text-[10px] px-6 py-1 rounded-full font-medium">
-                          {job.resolutionField}
-                        </span>
+                        <div className="font-medium text-gray-900">
+                          {job.duration}
+                        </div>
+                        <div>
+                          <p className="inline-flex items-center bg-blue-100 text-blue-700 text-[10px] px-3 py-1 rounded-full font-medium">
+                            {job.resolutionField}
+                          </p>
+                        </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 align-top text-gray-700">{job.intakeDetails}</td>
+                    <td className="px-4 py-3 align-top text-gray-700">
+                      {job.intakeDetails}
+                    </td>
                     <td className="px-4 py-3 align-top text-gray-900 font-medium">
                       $ {parseInt(job.remuneration || 0).toLocaleString()}
                     </td>
@@ -259,21 +279,25 @@ const SAMPLE_URL = `${process.env.PUBLIC_URL}/sample-posts (1) (2).xlsx`;
                           }
                         `}
                       >
-                        <span className={`w-2 h-2 rounded-full mr-2 ${
-                          job.status === "Booked"
-                            ? "bg-blue-500"
-                            : job.status === "Available"
-                            ? "bg-yellow-500"
-                            : job.status === "Completed"
-                            ? "bg-green-500"
-                            : job.status === "Aborted"
-                            ? "bg-red-500"
-                            : "bg-gray-500"
-                        }`}></span>
+                        <span
+                          className={`w-2 h-2 rounded-full mr-2 ${
+                            job.status === "Booked"
+                              ? "bg-blue-500"
+                              : job.status === "Available"
+                              ? "bg-yellow-500"
+                              : job.status === "Completed"
+                              ? "bg-green-500"
+                              : job.status === "Aborted"
+                              ? "bg-red-500"
+                              : "bg-gray-500"
+                          }`}
+                        ></span>
                         {job.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 align-top text-gray-700">{job.userName}</td>
+                    <td className="px-4 py-3 align-top text-gray-700">
+                      {job.userName}
+                    </td>
 
                     {/* <td className="px-4 py-2">
                     <button
@@ -288,7 +312,7 @@ const SAMPLE_URL = `${process.env.PUBLIC_URL}/sample-posts (1) (2).xlsx`;
               )}
             </tbody>
           </table>
-          </div>
+        </div>
 
         {/* Pagination */}
         {paginatedFilteredJobs.length > 0 && totalPages > 1 && (
