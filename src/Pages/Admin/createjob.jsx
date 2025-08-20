@@ -128,7 +128,7 @@ export default function CreateJob() {
           className="flex items-center gap-2 px-4 py-2 text-orange-500 shadow-sm rounded-lg hover:bg-orange-50 transition"
         >
           <img
-            src="/icons/left-direction.svg"
+            src="/images/left-direction.svg"
             alt="direction"
             className="w-6 h-6"
           />
@@ -138,7 +138,9 @@ export default function CreateJob() {
 
       {/* Form */}
       <div className="bg-white mt-6 shadow-md rounded-lg p-6 w-full max-w-3xl">
-        <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-600">Job Details</h2>
+        <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-600">
+          Job Details
+        </h2>
         <form
           onSubmit={handleCreateJobs}
           className="grid grid-cols-1 md:grid-cols-2 gap-4"
