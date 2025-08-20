@@ -143,18 +143,18 @@ export default function MemberApprove() {
           </div>
         </div>
 
-        {/* Table container for responsiveness */}
-        <div className="overflow-x-auto">
-          <table className="table-auto w-full text-sm min-w-[600px]">
+        {/* Table container */}
+        <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
+          <table className="w-full text-sm border-collapse">
             <thead>
-              <tr className="bg-gray-50 border-b text-left text-[12px] border-b-gray-300">
-                <th className="px-4 py-2">Job Id</th>
-                <th className="px-4 py-2">Brief overview</th>
-                <th className="px-4 py-2">Venue</th>
-                <th className="px-4 py-2">Duration</th>
-                <th className="px-4 py-2">Intake</th>
-                <th className="px-4 py-2">Remuneration</th>
-                <th className="px-4 py-2">Action</th>
+              <tr className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-600">
+                <th className="px-4 py-3 border-b border-gray-200">Job Id</th>
+                <th className="px-4 py-3 border-b border-gray-200">Brief Overview</th>
+                <th className="px-4 py-3 border-b border-gray-200">Venue</th>
+                <th className="px-4 py-3 border-b border-gray-200">Duration</th>
+                <th className="px-4 py-3 border-b border-gray-200">Intake</th>
+                <th className="px-4 py-3 border-b border-gray-200">Remuneration</th>
+                <th className="px-4 py-3 border-b border-gray-200">Action</th>
               </tr>
             </thead>
 
@@ -181,46 +181,43 @@ export default function MemberApprove() {
                 paginatedFilteredJobs.map((job, index) => (
                   <tr
                     key={index}
-                    className="hover:bg-gray-50 border-b border-b-gray-300 text-[12px]"
+                    className="hover:bg-gray-50 border-b border-gray-200 text-sm"
                   >
-                    <td className="px-4 py-2">{job.id}</td>
-                    <td className="px-4 py-2">
+                    <td className="px-4 py-3 align-top text-gray-900">{job.id}</td>
+                    <td className="px-4 py-3 align-top">
                       <div className="flex flex-col">
-                        <div className="flex gap-2 items-center flex-wrap">
-                          <h1>{job.briefOverview}</h1>
-                          <p className="bg-[#E0EEE0] hover:bg-green-400 text-center text-green-900 text-[8px] font-semibold px-2 rounded-3xl transition duration-200">
-                            {job.status}
-                          </p>
+                        <div className="font-medium text-gray-900">
+                          {job.briefOverview}
                         </div>
-                        <p className="text-[10px]">{job.date}</p>
+                        <div className="text-[10px] text-gray-500 mt-1">
+                          {job.date}
+                        </div>
                       </div>
                     </td>
-                    <td className="px-4 py-2">{job.venue}</td>
-                    <td className="px-4 py-2">
-                      <div className="flex gap-1 flex-wrap">
-                        <h1>{job.duration}</h1>
-                        <p className="bg-[#DEEFFC] hover:bg-blue-400 text-center text-blue-700 text-[8px] px-2 font-semibold rounded-3xl transition duration-200">
+                    <td className="px-4 py-3 align-top text-gray-700">{job.venue}</td>
+                    <td className="px-4 py-3 align-top">
+                      <div className="flex flex-col gap-1">
+                        <div className="font-medium text-gray-900">{job.duration}</div>
+                        <span className="bg-blue-100 text-blue-700 text-[10px] px-1 py-1 rounded-full font-medium">
                           {job.resolutionField}
-                        </p>
+                        </span>
                       </div>
                     </td>
-                    <td className="px-4 py-2">{job.intake}</td>
-                    <td className="px-4 py-2">
-                      <div className="font-medium">
-                        $ {parseInt(job.remuneration || 0).toLocaleString()}
-                      </div>
+                    <td className="px-4 py-3 align-top text-gray-700">{job.intake}</td>
+                    <td className="px-4 py-3 align-top text-gray-900 font-medium">
+                      $ {parseInt(job.remuneration || 0).toLocaleString()}
                     </td>
-                    <td className="px-4 py-2">
-                      <div className="flex gap-3">
+                    <td className="px-4 py-3 align-top">
+                      <div className="flex gap-2">
                         <button
                           onClick={() => openConfirmModal(job, "Completed")}
-                          className="bg-orange-500 hover:bg-orange-600 text-white text-10px font-semibold px-3 py-1 rounded-md transition duration-200 w-full sm:w-auto"
+                          className="bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-3 py-2 rounded-lg transition-colors"
                         >
                           Completed
                         </button>
                         <button
                           onClick={() => openConfirmModal(job, "Aborted")}
-                          className="bg-orange-500 hover:bg-orange-600 text-white text-10px font-semibold px-3 py-1 rounded-md transition duration-200 w-full sm:w-auto"
+                          className="bg-red-500 hover:bg-red-600 text-white text-xs font-medium px-3 py-2 rounded-lg transition-colors"
                         >
                           Aborted
                         </button>

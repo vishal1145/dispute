@@ -18,15 +18,16 @@ import {
 
 const PRODUCTS_PER_PAGE = 10;
 
+const toTitle = (s) =>
+  s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : "";
+
 export default function MemberApprove() {
   const baseUrl = process.env.REACT_APP_Base_Url;
-  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState([]);
   const [statusFilter, setStatusFilter] = useState("all");
 
-  // state for confirmation dialog
   const [open, setOpen] = useState(false);
   const [selectedAction, setSelectedAction] = useState(null);
   const [selectedUserId, setSelectedUserId] = useState(null);
@@ -35,9 +36,9 @@ export default function MemberApprove() {
     try {
       setLoading(true);
       const { data } = await axios.get(`${baseUrl}/users`);
-      setUsers(data.users);
+      setUsers(data.users || []);
     } catch (err) {
-      console.error("Error fetching jobs:", err);
+      console.error("Error fetching users:", err);
     } finally {
       setLoading(false);
     }
@@ -47,51 +48,43 @@ export default function MemberApprove() {
     getJobs();
   }, []);
 
-  const filteredJobs = users.filter((job) => {
+  const filteredJobs = users.filter((u) => {
     if (statusFilter === "all") return true;
-    return job.status?.toLowerCase() === statusFilter.toLowerCase();
+    return (u.status || "").toLowerCase() === statusFilter.toLowerCase();
   });
 
   const handleMemberStatus = async (status, userId) => {
     try {
       const body = {
-        userId: userId,
+        userId,
         action: status,
         adminNotes: `All documents verified and ${status}`,
       };
       setLoading(true);
       await axios.put(`${baseUrl}/admin/approve-user`, body, {
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         withCredentials: true,
       });
-
       toast.success(`Member ${status} successfully!`);
       getJobs();
     } catch (error) {
       toast.error(`Please try again later`);
-      setLoading(false);
     } finally {
       setLoading(false);
     }
   };
 
-  // Open confirmation dialog
   const handleOpenConfirm = (action, userId) => {
     setSelectedAction(action);
     setSelectedUserId(userId);
     setOpen(true);
   };
-
-  // Handle confirm
   const handleConfirm = () => {
     if (selectedAction && selectedUserId) {
       handleMemberStatus(selectedAction, selectedUserId);
     }
     setOpen(false);
   };
-
   const handleCancel = () => {
     setOpen(false);
     setSelectedAction(null);
@@ -103,10 +96,7 @@ export default function MemberApprove() {
     (currentPage - 1) * PRODUCTS_PER_PAGE,
     currentPage * PRODUCTS_PER_PAGE
   );
-
-  const handlePageChange = (event, value) => {
-    setCurrentPage(value);
-  };
+  const handlePageChange = (_e, value) => setCurrentPage(value);
 
   return (
     <div className="flex flex-col lg:flex-row min-h-screen">
@@ -114,9 +104,9 @@ export default function MemberApprove() {
       <ToastContainer />
 
       <div className="p-4 sm:p-6 flex-1 overflow-x-auto">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl sm:text-2xl font-bold mb-4">Total Members</h2>
-          <div className="flex flex-wrap gap-2 mb-5">
+        <div className="flex justify-between items-center mb-3">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-600">Total Members</h2>
+          <div className="flex flex-wrap gap-2">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
@@ -129,17 +119,18 @@ export default function MemberApprove() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="table-auto w-full text-sm min-w-[600px]">
+        {/* Table container */}
+        <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
+          <table className="w-full text-sm border-collapse">
             <thead>
-              <tr className="bg-gray-50 border-b text-left text-[12px] border-b-gray-300">
-                <th className="px-4 py-2">Name</th>
-                <th className="px-4 py-2">Company Name</th>
-                <th className="px-4 py-2">Address</th>
-                <th className="px-4 py-2">Contact</th>
-                <th className="px-4 py-2">Accredited By</th>
-                <th className="px-4 py-2">License Number</th>
-                <th className="px-4 py-2">Action</th>
+              <tr className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-600">
+                <th className="px-4 py-3 border-b border-gray-200">Name</th>
+                <th className="px-4 py-3 border-b border-gray-200">Company Name</th>
+                <th className="px-4 py-3 border-b border-gray-200">Address</th>
+                <th className="px-4 py-3 border-b border-gray-200">Contact</th>
+                <th className="px-4 py-3 border-b border-gray-200">Accredited By</th>
+                <th className="px-4 py-3 border-b border-gray-200">License Number</th>
+                <th className="px-4 py-3 border-b border-gray-200">Action</th>
               </tr>
             </thead>
 
@@ -156,65 +147,83 @@ export default function MemberApprove() {
                 <tr>
                   <td
                     colSpan="7"
-                    className="text-center font-semibold py-6 sm:py-8 md:py-20 text-gray-500 text-base sm:text-lg md:text-xl lg:text-lg"
+                    className="text-center font-semibold py-10 text-gray-500"
                   >
                     No records found
                   </td>
                 </tr>
               ) : (
-                paginatedFilteredJobs.map((job, index) => (
-                  <tr
-                    key={index}
-                    className="hover:bg-gray-50 border-b border-b-gray-300 text-[12px]"
-                  >
-                    <td className="px-4 py-2">
-                      {job.firstName.charAt(0).toUpperCase() + job.status.slice(1)}  {job.lastName.charAt(0).toUpperCase() + job.status.slice(1)}
-                      <p className=" text-green-900 text-[10px] font-semibold">
-                        {job.emailAddress}
-                      </p>
-                    </td>
-                    <td className="px-4 py-2">{job.companyName}</td>
-                    <td className="px-4 py-2">{job.address}</td>
-                    <td className="px-4 py-2">{job.phoneMobile}</td>
-                    <td className="px-4 py-2">{job.accreditedBy}</td>
-                    <td className="px-4 py-2">{job.licenseNumber}</td>
-                    <td className="px-4 py-2">
-                      {job.status === "all" ? (
-                        <div className="flex gap-3">
-                          <button
-                            onClick={() => handleOpenConfirm("approve", job.id)}
-                            className="bg-orange-500 hover:bg-orange-600 text-white text-10px font-semibold px-3 py-1 rounded-md"
-                          >
-                            Approve
-                          </button>
-                          <button
-                            onClick={() => handleOpenConfirm("reject", job.id)}
-                            className="bg-orange-500 hover:bg-orange-600 text-white text-10px font-semibold px-3 py-1 rounded-md"
-                          >
-                            Reject
-                          </button>
+                paginatedFilteredJobs.map((job, index) => {
+                  const fullName = `${toTitle(job.firstName)} ${toTitle(
+                    job.lastName
+                  )}`.trim();
+
+                  return (
+                    <tr
+                      key={index}
+                      className="hover:bg-gray-50 border-b border-gray-200 text-sm"
+                    >
+                      <td className="px-4 py-3 align-top">
+                        <div className="flex flex-col">
+                          <div className="font-medium text-gray-900">
+                            {fullName || "-"}
+                          </div>
+                          <div className="text-[10px] text-gray-500 mt-1">
+                            {job.emailAddress}
+                          </div>
                         </div>
-                      ) : (
-                        <p
-                          className={`text-center text-[8px] font-semibold px-2 rounded-3xl transition duration-200
-                                ${
-                                  job.status === "active"
-                                    ? "bg-green-400 text-green-950"
-                                    : ""
-                                }
-                                 ${
-                                   job.status === "reject"
-                                     ? "bg-red-400 text-red-950"
-                                     : ""
-                                 }
-                              `}
-                        >
-                          {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
-                        </p>
-                      )}
-                    </td>
-                  </tr>
-                ))
+                      </td>
+
+                      <td className="px-4 py-3 align-top text-gray-700">{job.companyName || "-"}</td>
+                      <td className="px-4 py-3 align-top text-gray-700">{job.address || "-"}</td>
+                      <td className="px-4 py-3 align-top text-gray-700">{job.phoneMobile || "-"}</td>
+                      <td className="px-4 py-3 align-top text-gray-700">{job.accreditedBy || "-"}</td>
+                      <td className="px-4 py-3 align-top text-gray-700">{job.licenseNumber || "-"}</td>
+
+                      <td className="px-4 py-3 align-top">
+                        {job.status === "all" || job.status === "pending" ? (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() =>
+                                handleOpenConfirm("approve", job.id)
+                              }
+                              className="bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium px-3 py-2 rounded-lg transition-colors"
+                            >
+                              Approve
+                            </button>
+                            <button
+                              onClick={() =>
+                                handleOpenConfirm("reject", job.id)
+                              }
+                              className="bg-red-500 hover:bg-red-600 text-white text-xs font-medium px-3 py-2 rounded-lg transition-colors"
+                            >
+                              Reject
+                            </button>
+                          </div>
+                        ) : (
+                          <span
+                            className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-medium ${
+                              job.status === "active"
+                                ? "bg-green-100 text-green-700"
+                                : job.status === "reject"
+                                ? "bg-red-100 text-red-700"
+                                : "bg-gray-100 text-gray-700"
+                            }`}
+                          >
+                            <span className={`w-2 h-2 rounded-full mr-2 ${
+                              job.status === "active"
+                                ? "bg-green-500"
+                                : job.status === "reject"
+                                ? "bg-red-500"
+                                : "bg-gray-500"
+                            }`}></span>
+                            {toTitle(job.status)}
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -247,11 +256,7 @@ export default function MemberApprove() {
       </div>
 
       {/* Confirmation Dialog */}
-      <Dialog
-        open={open}
-        onClose={handleCancel}
-        aria-labelledby="confirm-dialog-title"
-      >
+      <Dialog open={open} onClose={handleCancel} aria-labelledby="confirm-dialog-title">
         <DialogTitle id="confirm-dialog-title">Confirm Action</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -261,12 +266,7 @@ export default function MemberApprove() {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancel}>Cancel</Button>
-          <Button
-            onClick={handleConfirm}
-            variant="contained"
-            color="warning"
-            autoFocus
-          >
+          <Button onClick={handleConfirm} variant="contained" color="warning" autoFocus>
             Confirm
           </Button>
         </DialogActions>
