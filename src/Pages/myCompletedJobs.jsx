@@ -15,12 +15,16 @@ export default function MyCompletedJobs() {
   const baseUrl = process.env.REACT_APP_Base_Url;
   const [completedJobs, setCompletedJobs] = useState([]);
   const [loading, setLoading] = useState(false);
-const [searchParams] = useSearchParams();   // ✅ Get query params
-  const userId = searchParams.get("userId");
+  const [searchParams] = useSearchParams();   // ✅ Get query params
+  const qpUserId = searchParams.get("userId");
+  
+  // Prefer localStorage userId; fallback to "1" for dev
+  const userId = localStorage.getItem("userId");
+  
   const myJobs = async () => {
     try {
       setLoading(true); // show loader
-      const { data } = await axios.get(`${baseUrl}/jobs/completed/user/1`);
+      const { data } = await axios.get(`${baseUrl}/jobs/completed/user/${userId}`);
       setCompletedJobs(data.jobs);
       console.log("Jobs fetched:", data.jobs);
     } catch (err) {
@@ -29,16 +33,17 @@ const [searchParams] = useSearchParams();   // ✅ Get query params
       setLoading(false); // hide loader
     }
   };
+  
   useEffect(() => {
-      if (userId) {
-        localStorage.setItem("userId", userId);
-        console.log("Saved userId:", userId);
-      }
-    }, [userId]);
+    if (qpUserId) {
+      localStorage.setItem("userId", qpUserId);
+      console.log("Saved userId:", qpUserId);
+    }
+  }, [qpUserId]);
   
   useEffect(() => {
     myJobs();
-  }, []);
+  }, [userId]); // Re-fetch when userId changes
 
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -69,8 +74,11 @@ const [searchParams] = useSearchParams();   // ✅ Get query params
 
         {/* Top controls */}
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-5">
-          <div className="text-base font-medium text-gray-600">
-            Total Jobs {completedJobs.length}
+          <div className="flex flex-col gap-1">
+            <div className="text-base font-medium text-gray-600">
+              Total Jobs {completedJobs.length}
+            </div>
+         
           </div>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">

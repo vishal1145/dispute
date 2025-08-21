@@ -25,13 +25,17 @@ export default function MemberApprove() {
 
   // Fetch data from API when component mounts
   const [searchParams] = useSearchParams();   // ✅ Get query params
-    const userId = searchParams.get("userId");
+  const qpUserId = searchParams.get("userId");
+  
+  // Prefer localStorage userId; fallback to "1" for dev
+  const userId = localStorage.getItem("userId") || "1";
+  
   const getJobs = async () => {
     try {
       setLoading(true); // show loader
       const { data } = await axios.get(`${baseUrl}/jobs/status/Booked?`, {
         params: {
-          userId: 1,
+          userId: userId, // Use dynamic user ID from localStorage
         },
       });
       setGetJob(data.jobs);
@@ -42,15 +46,17 @@ export default function MemberApprove() {
       setLoading(false); // hide loader
     }
   };
+  
   useEffect(() => {
-      if (userId) {
-        localStorage.setItem("userId", userId);
-        console.log("Saved userId:", userId);
-      }
-    }, [userId]);
+    if (qpUserId) {
+      localStorage.setItem("userId", qpUserId);
+      console.log("Saved userId:", qpUserId);
+    }
+  }, [qpUserId]);
+  
   useEffect(() => {
     getJobs();
-  }, []);
+  }, [userId]); // Re-fetch when userId changes
 
   const openConfirmModal = (job, action) => {
     setSelectedJob(job);
@@ -76,7 +82,7 @@ export default function MemberApprove() {
       setLoading(true); //
       const postBody = {
         jobId: jobId,
-        userId: "1",
+        userId: userId, // Use dynamic user ID from localStorage
         action: action,
       };
       const apiResponse = await axios.post(`${baseUrl}/jobs/action`, postBody);
@@ -117,8 +123,11 @@ export default function MemberApprove() {
 
         {/* Header with job count and controls */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-5">
-          <div className="text-base font-medium text-gray-600">
-            Total Jobs {getJob.length}
+          <div className="flex flex-col gap-1">
+            <div className="text-base font-medium text-gray-600">
+              Total Jobs {getJob.length}
+            </div>
+         
           </div>
 
           <div className="flex flex-wrap gap-2">
