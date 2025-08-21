@@ -7,6 +7,22 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
+  // Listen for responses from parent window
+  React.useEffect(() => {
+    const handleMessage = function(event) {
+      if (event.data && event.data.action === 'logout_success') {
+        alert('Parent window confirmed logout: ' + event.data.message);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+
+    // Cleanup event listener on component unmount
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, []);
+
   // const logout = async () => {
   //   window.location.href = "https://disputesresolutions.com";
   // };
@@ -113,8 +129,14 @@ export default function Navbar() {
         <div className="mt-auto text-left px-6">
           <button
             onClick={() => {
-              // Add logout functionality here
-              console.log('Logout clicked');
+              const SITE_URL = "https://restapi.algofolks.com/dashboard";
+              if (SITE_URL) {
+                try {
+                  window.parent.location.href = `${SITE_URL}?logout=true`;
+                } catch (error) {
+                  alert('Error redirecting: ' + error.message);
+                }
+              }
             }}
             className="text-white hover:text-orange-400 text-lg font-medium transition-colors"
           >

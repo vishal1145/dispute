@@ -112,9 +112,7 @@ export default function JobList() {
       <ToastContainer />
 
       <div className="p-4 sm:p-6 flex-1 overflow-y-auto">
-        <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-600">
-          Job List
-        </h2>
+        <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-600">Job Schedule</h2>
 
         {/* Header with job count and controls */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-5">
