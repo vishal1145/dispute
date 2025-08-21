@@ -55,6 +55,11 @@ export default function MyAccount() {
           company: user.companyName || '',
           address: user.address || '',
           phone: user.phoneMobile || '',
+          expertise: user.expertise || '',
+          bankName: user.bankName || '',
+          bankBranch: user.bankBranch || '',
+          bankAccountNumber: user.bankAccountNumber || '',
+          bankAccountName: user.bankAccountName || '',
           additional: user.addionalInfornation || ''
         };
         
@@ -78,6 +83,8 @@ export default function MyAccount() {
       [name]: value
     }));
   };
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -124,6 +131,11 @@ export default function MyAccount() {
         company: 'companyName',
         address: 'address',
         phone: 'phoneMobile',
+        expertise: 'expertise',
+        bankName: 'bankName',
+        bankBranch: 'bankBranch',
+        bankAccountNumber: 'bankAccountNumber',
+        bankAccountName: 'bankAccountName',
         additional: 'addionalInfornation' // Note: this matches the typo in your Postman collection
       };
       
@@ -215,9 +227,41 @@ export default function MyAccount() {
                     value={formData[field.name] || ""}
                     onChange={handleInputChange}
                     placeholder={field.placeholder || ""}
-                    rows="1"
+                    rows={field.rows || "1"}
                     className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
                   ></textarea>
+                ) : field.type === "select" ? (
+                  <select
+                    name={field.name}
+                    value={formData[field.name] || ""}
+                    onChange={handleInputChange}
+                    className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    {field.options.map((option, optionIndex) => (
+                      <option key={optionIndex} value={option}>
+                        {option === "" ? "Select Expertise" : option}
+                      </option>
+                    ))}
+                  </select>
+                ) : field.type === "bank" ? (
+                  <div className="space-y-3">
+                    <p className="text-sm text-gray-600 mb-2"></p>
+                    {field.subFields.map((subField, subIndex) => (
+                      <div key={subIndex}>
+                        <label className="block text-xs uppercase tracking-wide font-medium mb-2 text-gray-600">
+                          {subField.label}
+                        </label>
+                        <input
+                          type={subField.type}
+                          name={subField.name}
+                          value={formData[subField.name] || ""}
+                          onChange={handleInputChange}
+                          placeholder={subField.placeholder || ""}
+                          className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+                    ))}
+                  </div>
                 ) : (
                   <input
                     type={field.type}

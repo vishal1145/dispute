@@ -4,7 +4,8 @@ import JobSchedule from "./Pages/jobSchedule";
 import MyCurrentJobs from "./Pages/myCurrentJobs";
 import MyCompletedJobs from "./Pages/myCompletedJobs";
 import MyAccount from "./Pages/myAccount";
-import CreateJobs from "./Pages/createJobs";
+import Dashboard from "./Pages/dashboard";
+
 // import Navbar from "./components/navbar";
 import MemberApprove from "./Pages/Admin/memberApprove";
 import CreateJob from "./Pages/Admin/createjob";
@@ -18,6 +19,8 @@ export default function App() {
       <Router>
         {/* < Navbar /> */}
         <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/job-scheduler" element={<JobSchedule />} />
           <Route path="/my-current-jobs" element={<MyCurrentJobs />} />
           <Route path="/my-completed-jobs" element={<MyCompletedJobs />} />

@@ -1,0 +1,62 @@
+{
+  "dashboardStats": {
+    "availableJobs": {
+      "count": 16,
+      "change": "+3",
+      "changeType": "increase",
+      "icon": "📋"
+    },
+    "totalJobsDone": {
+      "count": 0,
+      "change": "+2",
+      "changeType": "increase",
+      "icon": "✅"
+    },
+    "upcomingBookedJobs": {
+      "count": 16,
+      "change": "+2",
+      "changeType": "increase",
+      "icon": "📅"
+    },
+    "totalEarnings": {
+      "amount": 3449,
+      "change": "+800",
+      "changeType": "increase",
+      "icon": "💰"
+    }
+  },
+  "recentActivity": [
+    {
+      "id": 1,
+      "type": "job_completed",
+      "title": "Contract Dispute Resolution",
+      "user": "You",
+      "amount": 1200,
+      "date": "2024-01-15",
+      "status": "completed"
+    },
+    {
+      "id": 2,
+      "type": "job_booked",
+      "title": "Employment Mediation",
+      "user": "You",
+      "amount": 800,
+      "date": "2024-01-14",
+      "status": "booked"
+    },
+    {
+      "id": 3,
+      "type": "job_available",
+      "title": "Property Boundary Dispute",
+      "user": "Available",
+      "amount": 1500,
+      "date": "2024-01-13",
+      "status": "available"
+    }
+  ],
+  "monthlyTrends": {
+    "labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+    "jobsCompleted": [1, 2, 1, 3, 2, 3],
+    "earnings": [800, 1200, 800, 2400, 1600, 2400]
+  }
+}

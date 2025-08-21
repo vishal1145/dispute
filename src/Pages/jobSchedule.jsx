@@ -119,7 +119,7 @@ export default function JobList() {
         {/* Header with job count and controls */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-5">
           <div className="text-base font-medium text-gray-600">
-            Total Jobs {allJobLists?.length}
+            Available Jobs {allJobLists?.length}
           </div>
 
           <div className="flex flex-wrap gap-2">

@@ -6,5 +6,12 @@
   { "label": "Company Name", "type": "text", "name": "company", "placeholder": "If applicable" },
   { "label": "Address", "type": "textarea", "name": "address" },
   { "label": "Phone (Mobile)", "type": "tel", "name": "phone" },
-  { "label": "Additional Information", "type": "textarea", "name": "additional", "placeholder": "degrees, professions, areas of expertise, lawyer etc" }
+  { "label": "Expertise", "type": "select", "name": "expertise", "options": ["", "Mediation", "Arbitration", "Conciliation", "Negotiation", "Legal/ lawyer"] },
+      { "label": "Bank details", "type": "bank", "name": "bank", "subFields": [
+      { "label": "Bank", "type": "text", "name": "bankName", "placeholder": "Enter bank name" },
+      { "label": "Branch/BSB", "type": "text", "name": "bankBranch", "placeholder": "Enter branch or BSB code" },
+    { "label": "Account Number", "type": "text", "name": "bankAccountNumber", "placeholder": "Enter account number" },
+    { "label": "Account Name", "type": "text", "name": "bankAccountName", "placeholder": "Enter account holder name" }
+  ] },
+  { "label": "Additional Information", "type": "textarea", "name": "additional", "placeholder": "degrees, professions, areas of expertise, lawyer etc", "rows": "6" }
 ]
