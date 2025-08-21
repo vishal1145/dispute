@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import accountData from "../Data/accountData.json";
 import Navbar from "../components/navbar";
 import axios from "axios";
@@ -6,6 +6,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
+import { useSearchParams } from "react-router-dom";
 
 /* ---------- Reusable MultiSelect with checkboxes ---------- */
 function MultiSelect({ name, value = [], options = [], placeholder = "Select...", onChange }) {
@@ -72,15 +73,22 @@ function MultiSelect({ name, value = [], options = [], placeholder = "Select..."
 
 /* -------------------------- Page -------------------------- */
 export default function MyAccount() {
-  const baseUrl = process.env.REACT_APP_Base_Url;
+  // Use the exact API endpoint you want
+  const baseUrl = "https://restapi.algofolks.com/wp-json/wp-rest-api/v1";
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState(null);
+  const userId = "6"; // Hardcoded to use user ID 6
 
-  // Prefer localStorage userId; fallback to "6" for dev
-  const userId = localStorage.getItem("userId");
+  console.log("Base URL:", baseUrl);
+  console.log("Full API URL:", `${baseUrl}/user/${userId}`);
 
   console.log("Using userId:", userId);
+  console.log("Full fetch URL:", `${baseUrl}/user/${userId}`);
+
+  // Get userId from URL parameters (but don't use it for API calls)
+  const [searchParams] = useSearchParams();
+  const qpUserId = searchParams.get("userId");
 
   // Initialize form data from accountData
   useEffect(() => {
@@ -94,9 +102,9 @@ export default function MyAccount() {
       }
     });
     setFormData(initialData);
-    fetchUserProfile();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Note: We're not using localStorage userId anymore - always using "6"
 
   // Ensure form is always visible even if API fails
   useEffect(() => {
@@ -105,10 +113,13 @@ export default function MyAccount() {
     }
   }, [loading, userData]);
 
-  const fetchUserProfile = async () => {
+  const fetchUserProfile = useCallback(async () => {
     try {
       setLoading(true);
-      const { data } = await axios.get(`${baseUrl}/user/${encodeURIComponent(userId)}`);
+      const apiUrl = `${baseUrl}/user/${userId}`;
+      console.log("Fetching from:", apiUrl);
+      const { data } = await axios.get(apiUrl);
+      console.log("API Response:", data);
       const user = data?.user || data;
 
       const expertiseArray = Array.isArray(user.expertise)
@@ -137,11 +148,18 @@ export default function MyAccount() {
     } catch (err) {
       console.error("Error fetching user profile:", err);
       toast.error("Failed to fetch user profile. You can still update your details.");
+      console.error("Response data:", err.response?.data);
+      console.error("Response status:", err.response?.status);
       setUserData({});
     } finally {
       setLoading(false);
     }
-  };
+  }, [baseUrl]);
+
+  // Fetch user profile on component mount
+  useEffect(() => {
+    fetchUserProfile();
+  }, [fetchUserProfile]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target; // value can be string OR array (from MultiSelect)
@@ -214,10 +232,11 @@ export default function MyAccount() {
         updateData[dbFieldName] = typeof val === "string" ? val.trim() : val;
       });
 
-      console.log("Sending update request to:", `${baseUrl}/user/profile/update`);
+      const updateUrl = `${baseUrl}/user/profile/update`;
+      console.log("Sending update request to:", updateUrl);
       console.log("Update data:", updateData);
 
-      const response = await axios.put(`${baseUrl}/user/profile/update`, updateData);
+      const response = await axios.put(updateUrl, updateData);
 
       if (response.status === 200) {
         toast.success("Profile updated successfully!");
@@ -273,9 +292,12 @@ export default function MyAccount() {
           <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {accountData.map((field, index) => (
               <div key={index} className={`${field.fullWidth ? "sm:col-span-2" : ""}`}>
-                <label className="block text-xs uppercase tracking-wide font-medium mb-2 text-gray-600">
-                  {field.label}
-                </label>
+                {/* Don't show regular label for bank fields - they have special heading */}
+                {field.type !== "bank" && (
+                  <label className="block text-xs uppercase tracking-wide font-medium mb-2 text-gray-600">
+                    {field.label}
+                  </label>
+                )}
 
                 {field.type === "textarea" ? (
                   <textarea
@@ -312,6 +334,12 @@ export default function MyAccount() {
                   )
                 ) : field.type === "bank" ? (
                   <div className="space-y-3">
+                    {/* Bank details heading with special styling */}
+                    <div className="mb-4">
+                      <label className="block text-xl font-bold text-gray-800">
+                        {field.label}
+                      </label>
+                    </div>
                     {(field.subFields || []).map((subField, subIndex) => (
                       <div key={subIndex}>
                         <label className="block text-xs uppercase tracking-wide font-medium mb-2 text-gray-600">
@@ -353,10 +381,7 @@ export default function MyAccount() {
             </div>
           </form>
 
-          {/* Optional debug */}
-          <div className="mt-6 text-xs text-gray-500">
-            <div>Using userId: <span className="font-mono">{userId}</span></div>
-          </div>
+       
         </div>
       </div>
     </div>
