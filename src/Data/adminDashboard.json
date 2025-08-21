@@ -1,0 +1,25 @@
+{
+  "stats": {
+    "totalMembers": 1200,
+    "newMembers": 45,
+    "activeMembers": 1000,
+    "rejectedMembers": 200,
+    "jobsThisWeek": 30,
+    "jobsThisMonth": 110,
+    "bookedThisWeek": 25,
+    "bookedThisMonth": 90
+  },
+  "membersByState": [
+    { "state": "California", "count": 300 },
+    { "state": "Texas", "count": 200 },
+    { "state": "Florida", "count": 150 },
+    { "state": "New York", "count": 250 },
+    { "state": "Other", "count": 300 }
+  ],
+  "jobsByWeek": [
+    { "week": "Week 1", "jobs": 20, "booked": 15 },
+    { "week": "Week 2", "jobs": 30, "booked": 25 },
+    { "week": "Week 3", "jobs": 25, "booked": 20 },
+    { "week": "Week 4", "jobs": 35, "booked": 30 }
+  ]
+}

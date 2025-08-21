@@ -9,6 +9,17 @@ export default function Navbar() {
   //   window.location.href = "https://disputesresolutions.com";
   // };
 
+  const logoutViaRedirect = () => {
+    const siteUrl = process.env.SITE_URL;
+    if (siteUrl) {
+      try {
+        window.parent.location.href = `${siteUrl}?logout=true`;
+      } catch (error) {
+        alert("Error redirecting: " + error.message);
+      }
+    }
+  };
+
   return (
     <>
       {/* Mobile Header */}
@@ -35,22 +46,33 @@ export default function Navbar() {
           ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
       >
         {/* Logo */}
-        <div className="flex flex-col items-center mb-10">
-          {/* <img
+        <div className="flex flex-col items-left px-6 mb-10">
+          <img
             src="/icons/person-1.svg"
             alt="Dispute Resolutions"
             className="w-20 h-20 object-contain"
-          /> */}
+          />
           {/* <h1 className="text-lg font-bold tracking-wide text-blue-500">
             DISPUTE RESOLUTIONS
-          </h1> */}
-          {/* <span className="text-xs tracking-widest text-gray-400">
+          </h1>
+          <span className="text-xs tracking-widest text-gray-400">
             RESOLUTIONS
           </span> */}
         </div>
 
         {/* Links */}
         <div className="flex flex-col text-left gap-5 text-sm w-full px-6">
+          <NavLink
+            to="/admin/admin-dashboard"
+            className={({ isActive }) =>
+              isActive
+                ? "text-orange-400 font-bold"
+                : "text-white hover:text-orange-400"
+            }
+          >
+             DashBoard
+          </NavLink>
+
           <NavLink
             to="/admin/job-list"
             className={({ isActive }) =>
@@ -86,9 +108,9 @@ export default function Navbar() {
         </div>
 
         {/* Log Out */}
-        {/* <div className="mt-auto text-left px-6">
+        <div className="mt-auto text-left px-6">
           <NavLink
-            onClick={logout}
+            onClick={logoutViaRedirect}
             className={({ isActive }) =>
               isActive
                 ? "text-orange-400 font-bold"
@@ -97,7 +119,7 @@ export default function Navbar() {
           >
             Log Out
           </NavLink>
-        </div> */}
+        </div>
       </div>
 
       {/* Overlay for mobile */}

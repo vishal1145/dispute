@@ -27,7 +27,8 @@ export default function MemberApprove() {
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState([]);
   const [statusFilter, setStatusFilter] = useState("all");
-
+  const [searchTerm, setSearchTerm] = useState("");
+  const [uploading, setUploading] = useState(false); // button text only
   const [open, setOpen] = useState(false);
   const [selectedAction, setSelectedAction] = useState(null);
   const [selectedUserId, setSelectedUserId] = useState(null);
@@ -90,9 +91,27 @@ export default function MemberApprove() {
     setSelectedAction(null);
     setSelectedUserId(null);
   };
+  // Assuming jobs is your full jobs array
+  const searchedJobs = users.filter((job) => {
+    const search = searchTerm.toLowerCase();
 
-  const totalPages = Math.ceil(filteredJobs.length / PRODUCTS_PER_PAGE);
-  const paginatedFilteredJobs = filteredJobs.slice(
+    return (
+      // Search by alphabetical (assuming job.name or job.title)
+     // Search by full name
+    `${job.firstName || ""} ${job.lastName || ""}`.toLowerCase().includes(search) ||
+      job.title?.toLowerCase().includes(search) ||
+      // Search by address
+      job.address?.toLowerCase().includes(search) ||
+      // Search by resolution
+      job.resolution?.toLowerCase().includes(search) ||
+      // Search by number of jobs (convert number to string)
+      job.numberOfJobs?.toString().includes(search)
+    );
+    console.log(searchedJobs)
+  });
+
+  const totalPages = Math.ceil(searchedJobs.length / PRODUCTS_PER_PAGE);
+  const paginatedFilteredJobs = searchedJobs.slice(
     (currentPage - 1) * PRODUCTS_PER_PAGE,
     currentPage * PRODUCTS_PER_PAGE
   );
@@ -105,8 +124,22 @@ export default function MemberApprove() {
 
       <div className="p-4 sm:p-6 flex-1 overflow-x-auto">
         <div className="flex justify-between items-center mb-3">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-600">Total Members</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-600">
+            Total Members
+          </h2>
           <div className="flex flex-wrap gap-2">
+            <input
+              type="text"
+              placeholder="Search..."
+              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 w-full sm:w-auto"
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+              disabled={uploading}
+            />
+
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
@@ -125,11 +158,20 @@ export default function MemberApprove() {
             <thead>
               <tr className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-600">
                 <th className="px-4 py-3 border-b border-gray-200">Name</th>
-                <th className="px-4 py-3 border-b border-gray-200">Company Name</th>
+                <th className="px-4 py-3 border-b border-gray-200">
+                  Company Name
+                </th>
                 <th className="px-4 py-3 border-b border-gray-200">Address</th>
                 <th className="px-4 py-3 border-b border-gray-200">Contact</th>
-                <th className="px-4 py-3 border-b border-gray-200">Accredited By</th>
-                <th className="px-4 py-3 border-b border-gray-200">License Number</th>
+                <th className="px-4 py-3 border-b border-gray-200">
+                  Accredited By
+                </th>
+                <th className="px-4 py-3 border-b border-gray-200">
+                  License Number
+                </th>
+                {/* <th className="px-4 py-3 border-b border-gray-200">
+                  Resolution Field
+                </th> */}
                 <th className="px-4 py-3 border-b border-gray-200">Action</th>
               </tr>
             </thead>
@@ -174,11 +216,24 @@ export default function MemberApprove() {
                         </div>
                       </td>
 
-                      <td className="px-4 py-3 align-top text-gray-700">{job.companyName || "-"}</td>
-                      <td className="px-4 py-3 align-top text-gray-700">{job.address || "-"}</td>
-                      <td className="px-4 py-3 align-top text-gray-700">{job.phoneMobile || "-"}</td>
-                      <td className="px-4 py-3 align-top text-gray-700">{job.accreditedBy || "-"}</td>
-                      <td className="px-4 py-3 align-top text-gray-700">{job.licenseNumber || "-"}</td>
+                      <td className="px-4 py-3 align-top text-gray-700">
+                        {job.companyName || "-"}
+                      </td>
+                      <td className="px-4 py-3 align-top text-gray-700">
+                        {job.address || "-"}
+                      </td>
+                      <td className="px-4 py-3 align-top text-gray-700">
+                        {job.phoneMobile || "-"}
+                      </td>
+                      <td className="px-4 py-3 align-top text-gray-700">
+                        {job.accreditedBy || "-"}
+                      </td>
+                      <td className="px-4 py-3 align-top text-gray-700">
+                        {job.licenseNumber || "-"}
+                      </td>
+                      {/* <td className="px-4 py-3 align-top text-gray-700">
+                        {job.resolutionField || "-"}
+                      </td> */}
 
                       <td className="px-4 py-3 align-top">
                         {job.status === "inactive" ? (
@@ -210,13 +265,15 @@ export default function MemberApprove() {
                                 : "bg-gray-100 text-gray-700"
                             }`}
                           >
-                            <span className={`w-2 h-2 rounded-full mr-2 ${
-                              job.status === "active"
-                                ? "bg-green-500"
-                                : job.status === "reject"
-                                ? "bg-red-500"
-                                : "bg-gray-500"
-                            }`}></span>
+                            <span
+                              className={`w-2 h-2 rounded-full mr-2 ${
+                                job.status === "active"
+                                  ? "bg-green-500"
+                                  : job.status === "reject"
+                                  ? "bg-red-500"
+                                  : "bg-gray-500"
+                              }`}
+                            ></span>
                             {toTitle(job.status)}
                           </span>
                         )}
@@ -256,7 +313,11 @@ export default function MemberApprove() {
       </div>
 
       {/* Confirmation Dialog */}
-      <Dialog open={open} onClose={handleCancel} aria-labelledby="confirm-dialog-title">
+      <Dialog
+        open={open}
+        onClose={handleCancel}
+        aria-labelledby="confirm-dialog-title"
+      >
         <DialogTitle id="confirm-dialog-title">Confirm Action</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -266,7 +327,12 @@ export default function MemberApprove() {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancel}>Cancel</Button>
-          <Button onClick={handleConfirm} variant="contained" color="warning" autoFocus>
+          <Button
+            onClick={handleConfirm}
+            variant="contained"
+            color="warning"
+            autoFocus
+          >
             Confirm
           </Button>
         </DialogActions>

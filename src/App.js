@@ -10,6 +10,7 @@ import MemberApprove from "./Pages/Admin/memberApprove";
 import CreateJob from "./Pages/Admin/createjob";
 import JobList from "./Pages/Admin/jobList";
 import Account from "./Pages/Admin/account";
+import AdminDashboard from "./Pages/Admin/adminDashboard";
 
 export default function App() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
           <Route path="/admin/create-job" element={<CreateJob />} />
           <Route path="/admin/job-list" element={<JobList />} />
           <Route path="/admin/account" element={<Account />} />
+          <Route path="/admin/admin-dashboard" element={<AdminDashboard />} />
         </Routes>
       </Router>
     </div>

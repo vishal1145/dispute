@@ -178,6 +178,9 @@ export default function CreateJob() {
               <option value="Mediation">Mediation</option>
               <option value="Arbitration">Arbitration</option>
               <option value="Negotiation">Negotiation</option>
+              <option value="Conciliation">Conciliation</option>
+              <option value="Legal">Legal</option>
+              <option value="Other">Other</option>
             </select>
             {errors.resolutionField && (
               <p className="text-red-500 text-sm">{errors.resolutionField}</p>

@@ -23,7 +23,7 @@ export default function JobList() {
   const [status, setStatus] = useState("");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
-  const [searchParams] = useSearchParams();   // ✅ Get query params
+  const [searchParams] = useSearchParams(); // ✅ Get query params
   const userId = searchParams.get("userId");
   // Fetch data from API when component mounts
   useEffect(() => {
@@ -112,7 +112,9 @@ export default function JobList() {
       <ToastContainer />
 
       <div className="p-4 sm:p-6 flex-1 overflow-y-auto">
-        <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-600">Job List</h2>
+        <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-600">
+          Job List
+        </h2>
 
         {/* Header with job count and controls */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-5">
@@ -145,11 +147,15 @@ export default function JobList() {
             <thead>
               <tr className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-600">
                 <th className="px-4 py-3 border-b border-gray-200">Job Id</th>
-                <th className="px-4 py-3 border-b border-gray-200">Brief Overview</th>
+                <th className="px-4 py-3 border-b border-gray-200">
+                  Brief Overview
+                </th>
                 <th className="px-4 py-3 border-b border-gray-200">Venue</th>
                 <th className="px-4 py-3 border-b border-gray-200">Duration</th>
                 <th className="px-4 py-3 border-b border-gray-200">Intake</th>
-                <th className="px-4 py-3 border-b border-gray-200">Remuneration</th>
+                <th className="px-4 py-3 border-b border-gray-200">
+                  Remuneration
+                </th>
                 <th className="px-4 py-3 border-b border-gray-200">Action</th>
               </tr>
             </thead>
@@ -179,7 +185,9 @@ export default function JobList() {
                     key={index}
                     className="hover:bg-gray-50 border-b border-gray-200 text-sm"
                   >
-                    <td className="px-4 py-3 align-top text-gray-900">{job.id}</td>
+                    <td className="px-4 py-3 align-top text-gray-900">
+                      {job.id}
+                    </td>
                     <td className="px-4 py-3 align-top">
                       <div className="flex flex-col">
                         <div className="font-medium text-gray-900">
@@ -190,16 +198,22 @@ export default function JobList() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 align-top text-gray-700">{job.venue}</td>
+                    <td className="px-4 py-3 align-top text-gray-700">
+                      {job.venue}
+                    </td>
                     <td className="px-4 py-3 align-top">
                       <div className="flex flex-col gap-1">
-                        <div className="font-medium text-gray-900">{job.duration}</div>
+                        <div className="font-medium text-gray-900">
+                          {job.duration}
+                        </div>
                         <span className="bg-blue-100 text-blue-700 text-[10px] px-2 py-1 rounded-full font-medium inline-block w-fit">
                           {job.resolutionField}
                         </span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 align-top text-gray-700">{job.intakeDetails}</td>
+                    <td className="px-4 py-3 align-top text-gray-700">
+                      {job.intakeDetails}
+                    </td>
                     <td className="px-4 py-3 align-top text-gray-900 font-medium">
                       $ {parseInt(job.remuneration || 0).toLocaleString()}
                     </td>
@@ -248,7 +262,8 @@ export default function JobList() {
           <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
             <h3 className="text-lg font-bold mb-4">Confirm Booking</h3>
             <p className="text-sm mb-4">
-              Are you sure you want to book the job titled: "{selectedJob.briefOverview}"?
+              Are you sure you want to book the job titled: "
+              {selectedJob.briefOverview}"?
             </p>
             <div className="flex justify-end gap-2">
               <button
