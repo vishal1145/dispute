@@ -97,8 +97,8 @@ export default function Dashboard() {
         </div>
 
         {/* Stats Grid */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Admin Overview</h3>
+      <div className=" mb-8">
+          {/* <h3 className="text-lg font-semibold text-gray-900 mb-4">Admin Overview</h3> */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Admin Stat Cards */}
             <div className="bg-emerald-50 rounded-xl p-6 border border-emerald-200 shadow-sm">

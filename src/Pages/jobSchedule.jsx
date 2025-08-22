@@ -24,14 +24,19 @@ export default function JobList() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
   const [searchParams] = useSearchParams(); // ✅ Get query params
-  const userId = searchParams.get("userId");
+  const qpUserId = searchParams.get("userId");
+  
+  // Prefer localStorage userId; fallback to "1" for dev
+  const userId = localStorage.getItem("userId") ;
+    console.log("Using userId:", userId);
+  
   // Fetch data from API when component mounts
   useEffect(() => {
-    if (userId) {
-      localStorage.setItem("userId", userId);
-      console.log("Saved userId:", userId);
+    if (qpUserId) {
+      localStorage.setItem("userId", qpUserId);
+      console.log("Saved userId:", qpUserId);
     }
-  }, [userId]);
+  }, [qpUserId]);
 
   useEffect(() => {
     fetchJobs();
@@ -71,7 +76,7 @@ export default function JobList() {
     try {
       setLoading(true); // show loader
       const updateBody = {
-        userId: "1",
+        userId: userId, // Use dynamic user ID from localStorage
         status: "Booked",
       };
       const apiResponse = await axios.put(
@@ -116,8 +121,11 @@ export default function JobList() {
 
         {/* Header with job count and controls */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-5">
-          <div className="text-base font-medium text-gray-600">
-            Available Jobs {allJobLists?.length}
+          <div className="flex flex-col gap-1">
+            <div className="text-base font-medium text-gray-600">
+              Available Jobs {allJobLists?.length}
+            </div>
+         
           </div>
 
           <div className="flex flex-wrap gap-2">
