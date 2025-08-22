@@ -226,7 +226,7 @@ export default function MemberApprove() {
                               onClick={() => handleNavigate(job.id)}
                               className="font-medium text-gray-900 cursor-pointer"
                             >
-                              {fullName || "-"} | {job.id}
+                              {fullName || "-"} 
                             </div>
                             <div className="text-[10px] text-gray-500 mt-1">
                               ({job.jobStatistics?.completedJobs})
