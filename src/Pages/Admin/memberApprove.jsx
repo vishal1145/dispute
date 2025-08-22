@@ -5,6 +5,7 @@ import Header from "../../components/header";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
@@ -32,6 +33,7 @@ export default function MemberApprove() {
   const [open, setOpen] = useState(false);
   const [selectedAction, setSelectedAction] = useState(null);
   const [selectedUserId, setSelectedUserId] = useState(null);
+  const navigate = useNavigate();
 
   const getJobs = async () => {
     try {
@@ -49,10 +51,10 @@ export default function MemberApprove() {
     getJobs();
   }, []);
 
-  const filteredJobs = users.filter((u) => {
-    if (statusFilter === "all") return true;
-    return (u.status || "").toLowerCase() === statusFilter.toLowerCase();
-  });
+  // const filteredJobs = users.filter((u) => {
+  //   if (statusFilter === "all") return true;
+  //   return (u.status || "").toLowerCase() === statusFilter.toLowerCase();
+  // });
 
   const handleMemberStatus = async (status, userId) => {
     try {
@@ -95,19 +97,25 @@ export default function MemberApprove() {
   const searchedJobs = users.filter((job) => {
     const search = searchTerm.toLowerCase();
 
+    // status filter
+    if (
+      statusFilter !== "all" &&
+      (job.status || "").toLowerCase() !== statusFilter.toLowerCase()
+    ) {
+      return false;
+    }
+
+    // search filter
     return (
-      // Search by alphabetical (assuming job.name or job.title)
-     // Search by full name
-    `${job.firstName || ""} ${job.lastName || ""}`.toLowerCase().includes(search) ||
+      `${job.firstName || ""} ${job.lastName || ""}`
+        .toLowerCase()
+        .includes(search) ||
       job.title?.toLowerCase().includes(search) ||
-      // Search by address
       job.address?.toLowerCase().includes(search) ||
-      // Search by resolution
       job.resolution?.toLowerCase().includes(search) ||
-      // Search by number of jobs (convert number to string)
-      job.numberOfJobs?.toString().includes(search)
+      job.numberOfJobs?.toString().includes(search) ||
+      job.jobStatistics?.completedJobs?.toString().includes(search)
     );
-    console.log(searchedJobs)
   });
 
   const totalPages = Math.ceil(searchedJobs.length / PRODUCTS_PER_PAGE);
@@ -116,6 +124,12 @@ export default function MemberApprove() {
     currentPage * PRODUCTS_PER_PAGE
   );
   const handlePageChange = (_e, value) => setCurrentPage(value);
+
+  const handleNavigate = (id) => {
+    debugger;
+    navigate(`/admin/account?member_id=${id}`); // 👈 route to Admin Account page
+    // navigate(`/admin/account`); // 👈 route to Admin Account page
+  };
 
   return (
     <div className="flex flex-col lg:flex-row h-[100vh]">
@@ -207,8 +221,16 @@ export default function MemberApprove() {
                     >
                       <td className="px-4 py-3 align-top">
                         <div className="flex flex-col">
-                          <div className="font-medium text-gray-900">
-                            {fullName || "-"}
+                          <div className="flex gap-2 text-center items-end">
+                            <div
+                              onClick={() => handleNavigate(job.id)}
+                              className="font-medium text-gray-900 cursor-pointer"
+                            >
+                              {fullName || "-"} | {job.id}
+                            </div>
+                            <div className="text-[10px] text-gray-500 mt-1">
+                              ({job.jobStatistics?.completedJobs})
+                            </div>
                           </div>
                           <div className="text-[10px] text-gray-500 mt-1">
                             {job.emailAddress}
@@ -232,7 +254,7 @@ export default function MemberApprove() {
                         {job.licenseNumber || "-"}
                       </td>
                       {/* <td className="px-4 py-3 align-top text-gray-700">
-                        {job.resolutionField || "-"}
+                        {job.jobStatistics.userJobs.resolutionField || "-"}
                       </td> */}
 
                       <td className="px-4 py-3 align-top">

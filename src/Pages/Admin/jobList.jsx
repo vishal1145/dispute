@@ -18,6 +18,7 @@ export default function JobList() {
   const fileInputRef = useRef(null);
   const [uploading, setUploading] = useState(false); // button text only
   const SAMPLE_URL = `${process.env.PUBLIC_URL}/sample-posts (1) (2).xlsx`;
+  
   const fetchJobs = async () => {
     try {
       setLoading(true);
