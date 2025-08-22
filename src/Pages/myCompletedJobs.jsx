@@ -85,9 +85,9 @@ export default function MyCompletedJobs() {
       <div className="p-4 md:p-6 w-full overflow-y-auto">
         {/* Header */}
         <h2 className="text-xl sm:text-2xl font-bold mb-1 text-gray-600">My Completed Jobs</h2>
-        <div className="text-xs text-gray-500 mb-4">
+        {/* <div className="text-xs text-gray-500 mb-4">
           Using User ID: <span className="font-semibold">{effectiveUserId || "N/A"}</span>
-        </div>
+        </div> */}
 
         {/* Top controls */}
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-5">

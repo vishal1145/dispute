@@ -15,6 +15,8 @@ import axios from "axios";
 import { useSearchParams } from "react-router-dom";
 
 export default function Dashboard() {
+  const baseUrl = process.env.REACT_APP_Base_Url;
+
   const navigate = useNavigate();
   const [stats, setStats] = useState(dashboardData.dashboardStats);
   const [recentActivity, setRecentActivity] = useState(dashboardData.recentActivity);
@@ -42,11 +44,11 @@ export default function Dashboard() {
       setDashboardError(null);
       console.log('Fetching dashboard stats...');
       
-      const response = await axios.get('https://restapi.algofolks.com/wp-json/wp-rest-api/v1/user/dashboard/14', {
-        headers: {
-          'Cookie': 'PHPSESSID=1doop8s83ovbci3mrracshrud3'
-        }
-      });
+      // Use the userId from localStorage or fallback to "6"
+      const currentUserId = localStorage.getItem("user_id");
+             
+        
+        const response = await axios.get(`${baseUrl}/user/dashboard/${currentUserId}`);
       
       console.log('Dashboard Stats API Response:', response);
       setDashboardStats(response.data);
@@ -65,11 +67,12 @@ export default function Dashboard() {
     try {
       setApiLoading(true);
       setApiError(null);
-      const response = await axios.get('https://restapi.algofolks.com/wp-json/wp-rest-api/v1/user/recent-activity/14', {
-        headers: {
-          'Cookie': 'PHPSESSID=0fe7ntpgunq7k4s40pt1gf1nr7'
-        }
-      });
+      
+      // Use the userId from localStorage or fallback to "6"
+      const currentUserId = localStorage.getItem("user_id") ;
+         
+        
+        const response = await axios.get(`${baseUrl}/user/recent-activity/${currentUserId}`);
       setApiData(response.data);
       console.log('Recent Activity API Data:', response.data);
     } catch (error) {
@@ -80,11 +83,11 @@ export default function Dashboard() {
     }
   };
 
-  // Call APIs on component mount
+  // Call APIs on component mount and when userId changes
   useEffect(() => {
     fetchDashboardStats();
     fetchRecentActivity();
-  }, []);
+  }, [userId]);
 
 
 
@@ -186,8 +189,7 @@ export default function Dashboard() {
             </div>
           )}
           
-          {/* Debug Info - Show API data */}
-     
+          
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Admin Stat Cards */}
@@ -212,7 +214,7 @@ export default function Dashboard() {
                 </div>
                 <div className="flex-1">
                   <p className="text-3xl font-bold text-gray-900 mb-2">
-                    0
+                    {dashboardStats?.dashboard?.totalJobsDone?.count || dashboardStats?.totalJobsDone?.count || dashboardStats?.totalJobsDone || "0"}
                   </p>
                   <p className="text-sm font-medium text-gray-700">Total Jobs Done</p>
                 </div>
@@ -226,7 +228,7 @@ export default function Dashboard() {
                 </div>
                 <div className="flex-1">
                   <p className="text-3xl font-bold text-gray-900 mb-2">
-                    0
+                    {dashboardStats?.dashboard?.pastMonthJobs?.count || dashboardStats?.pastMonthJobs?.count || dashboardStats?.pastMonthJobs || "0"}
                   </p>
                   <p className="text-sm font-medium text-gray-700">Past Month Jobs</p>
                 </div>
@@ -271,12 +273,12 @@ export default function Dashboard() {
           </div>
         </div>
         {/* Member Dashboard Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          {/* Monthly Trends Chart */}
+        <div className=" grid-cols-1 lg:grid-cols-2 gap-8 mb-8 hidden">
+
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">My Monthly Progress</h3>
             <div className="space-y-4">
-              {/* Simple Bar Chart Representation */}
+           
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-600">Jobs Completed</span>

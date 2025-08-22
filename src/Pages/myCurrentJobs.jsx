@@ -131,9 +131,9 @@ export default function MemberApprove() {
             <div className="text-base font-medium text-gray-600">
               Total Jobs {getJob.length}
             </div>
-            <div className="text-xs text-gray-500">
+            {/* <div className="text-xs text-gray-500">
               Using User ID: <span className="font-semibold">{userId || "N/A"}</span>
-            </div>
+            </div> */}
           </div>
 
           <div className="flex flex-wrap gap-2">
