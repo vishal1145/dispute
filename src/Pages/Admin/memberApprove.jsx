@@ -132,7 +132,7 @@ export default function MemberApprove() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row h-[100vh]">
+    <div className="flex flex-col md:flex-row lg:flex-row h-[100vh]">
       <Header />
       <ToastContainer />
 

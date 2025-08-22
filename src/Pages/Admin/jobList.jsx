@@ -106,7 +106,7 @@ export default function JobList() {
       : "bg-gray-100 text-gray-700";
 
   return (
-    <div className="flex flex-col lg:flex-row h-[100vh]">
+    <div className="flex flex-col md:flex-row lg:flex-row h-[100vh]">
       <Header />
 
       <div className="p-4 sm:p-6 flex-1 overflow-x-auto">
