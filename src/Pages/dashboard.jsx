@@ -176,22 +176,22 @@ export default function Dashboard() {
           {/* <h3 className="text-lg font-semibold text-gray-900 mb-4">Admin Overview</h3> */}
           
           {/* Dashboard Stats Loading & Error States */}
-          {dashboardLoading && (
-            <div className="col-span-full bg-blue-50 p-4 rounded-lg text-center mb-4">
-              <div className="text-blue-600">Loading dashboard stats...</div>
-            </div>
-          )}
+                      {/* {dashboardLoading && (
+              <div className="col-span-full bg-blue-50 p-4 rounded-lg text-center mb-4">
+                <div className="text-blue-600">Loading dashboard stats...</div>
+              </div>
+            )} */}
           
-          {dashboardError && (
-            <div className="col-span-full bg-red-50 p-4 rounded-lg mb-4">
-              <div className="text-red-600 font-medium">Dashboard Stats Error:</div>
-              <div className="text-red-700 text-sm">{dashboardError}</div>
-            </div>
-          )}
-          
-          
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {/* {dashboardError && (
+              <div className="col-span-full bg-red-50 p-4 rounded-lg mb-4">
+                <div className="text-red-600 font-medium">Dashboard Stats Error:</div>
+                <div className="text-red-700 text-sm">{dashboardError}</div>
+              </div>
+            )}
+           */}
+                      {/* Debug Info - Show API data */}
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Admin Stat Cards */}
             <div className="bg-emerald-50 rounded-xl p-6 border border-emerald-200 shadow-sm">
               <div className="flex flex-col">
@@ -199,10 +199,18 @@ export default function Dashboard() {
                   <Users className="w-6 h-6" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-3xl font-bold text-gray-900 mb-2">
-                    {dashboardStats?.dashboard?.availableJobs?.count || dashboardStats?.availableJobs?.count || dashboardStats?.availableJobs || "0"}
-                  </p>
-                  <p className="text-sm font-medium text-gray-700">Available Jobs</p>
+                  {dashboardLoading ? (
+                    <div className="flex items-center justify-center h-16">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-3xl font-bold text-gray-900 mb-2">
+                        {dashboardStats?.dashboard?.availableJobs?.count || dashboardStats?.availableJobs?.count || "0"}
+                      </p>
+                      <p className="text-sm font-medium text-gray-700">Available Jobs</p>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -213,10 +221,18 @@ export default function Dashboard() {
                   <CheckCircle className="w-6 h-6" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-3xl font-bold text-gray-900 mb-2">
-                    {dashboardStats?.dashboard?.totalJobsDone?.count || dashboardStats?.totalJobsDone?.count || dashboardStats?.totalJobsDone || "0"}
-                  </p>
-                  <p className="text-sm font-medium text-gray-700">Total Jobs Done</p>
+                  {dashboardLoading ? (
+                    <div className="flex items-center justify-center h-16">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-3xl font-bold text-gray-900 mb-2">
+                        {dashboardStats?.dashboard?.totalJobsCompleted || dashboardStats?.totalJobsCompleted || "0"}
+                      </p>
+                      <p className="text-sm font-medium text-gray-700">Total Jobs Done</p>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -227,10 +243,18 @@ export default function Dashboard() {
                   <Calendar className="w-6 h-6" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-3xl font-bold text-gray-900 mb-2">
-                    {dashboardStats?.dashboard?.pastMonthJobs?.count || dashboardStats?.pastMonthJobs?.count || dashboardStats?.pastMonthJobs || "0"}
-                  </p>
-                  <p className="text-sm font-medium text-gray-700">Past Month Jobs</p>
+                  {dashboardLoading ? (
+                    <div className="flex items-center justify-center h-16">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-3xl font-bold text-gray-900 mb-2">
+                        {dashboardStats?.dashboard?.pastMonthJobs?.count || dashboardStats?.pastMonthJobs?.count || "0"}
+                      </p>
+                      <p className="text-sm font-medium text-gray-700">Past Month Jobs</p>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 export default function Navbar() {
+  const baseUrl = process.env.REACT_APP_Base_Url;
   const [isOpen, setIsOpen] = useState(false);
   const [userName, setUserName] = useState("John");
   const [userLoading, setUserLoading] = useState(false);
@@ -14,23 +15,24 @@ export default function Navbar() {
   const fetchUserData = async () => {
     try {
       setUserLoading(true);
-      const response = await axios.get('https://restapi.algofolks.com/wp-json/wp-rest-api/v1/user/dashboard/14', {
-        headers: {
-          'Cookie': 'PHPSESSID=1doop8s83ovbci3mrracshrud3'
-        }
-      });
       
-      console.log('User Data API Response:', response.data);
+      // Get userId from localStorage or fallback
+      const currentUserId = localStorage.getItem("user_id") ;
+      
+      
+      const { data } = await axios.get(`${baseUrl}/user/dashboard/${currentUserId}`);
+      
+      console.log('User Data API Response:', data);
       
       // Extract user name from the API response
-      const firstName = response.data?.userInfo?.firstName || 
-                       response.data?.dashboard?.userInfo?.firstName || 
-                       response.data?.user?.firstName || 
+      const firstName = data?.userInfo?.firstName || 
+                       data?.dashboard?.userInfo?.firstName || 
+                       data?.user?.firstName || 
                        "";
       
-      const lastName = response.data?.userInfo?.lastName || 
-                      response.data?.dashboard?.userInfo?.lastName || 
-                      response.data?.user?.lastName || 
+      const lastName = data?.userInfo?.lastName || 
+                      data?.dashboard?.userInfo?.lastName || 
+                      data?.user?.lastName || 
                       "";
       
       const name = firstName && lastName ? `${firstName} ${lastName}` : 
@@ -61,10 +63,26 @@ export default function Navbar() {
     };
   }, []);
 
-  // Fetch user data on component mount
+  // Get userId from localStorage
+  const [userId, setUserId] = useState(() => localStorage.getItem("user_id") || "6");
+
+  // Fetch user data on component mount and when userId changes
   useEffect(() => {
     fetchUserData();
-  }, []);
+  }, [userId]);
+
+  // Listen for userId changes in localStorage
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const newUserId = localStorage.getItem("user_id");
+      if (newUserId && newUserId !== userId) {
+        setUserId(newUserId);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [userId]);
 
   // const logout = async () => {
   //   window.location.href = "https://disputesresolutions.com";
