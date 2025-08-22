@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from "react";
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
-import jobData from "../Data/jobData.json";
 import Navbar from "../components/navbar";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useSearchParams } from "react-router-dom";
-// import { FiFilter, FiPlus } from "react-icons/fi";
 
 const PRODUCTS_PER_PAGE = 10;
+const STORAGE_KEY = "user_id";
 
 export default function MemberApprove() {
   const baseUrl = process.env.REACT_APP_Base_Url;
@@ -23,40 +21,47 @@ export default function MemberApprove() {
   const [selectedJob, setSelectedJob] = useState(null);
   const [selectedAction, setSelectedAction] = useState("");
 
-  // Fetch data from API when component mounts
-  const [searchParams] = useSearchParams();   // ✅ Get query params
-  const qpUserId = searchParams.get("userId");
-  
-  // Prefer localStorage userId; fallback to "1" for dev
-  const userId = localStorage.getItem("userId") || "1";
-  
+  // ✅ Always use only "user_id" from localStorage
+  const userId = localStorage.getItem(STORAGE_KEY);
+
   const getJobs = async () => {
+    if (!userId) {
+      console.warn("⚠️ No user_id found in localStorage, cannot fetch jobs");
+      setGetJob([]);
+      return;
+    }
+
     try {
-      setLoading(true); // show loader
-      const { data } = await axios.get(`${baseUrl}/jobs/status/Booked?`, {
-        params: {
-          userId: userId, // Use dynamic user ID from localStorage
-        },
+      setLoading(true);
+      console.log("🚀 Fetching current jobs for userId:", userId);
+      const { data } = await axios.get(`${baseUrl}/jobs/status/Booked`, {
+        params: { userId },
       });
-      setGetJob(data.jobs);
-      console.log("Jobs fetched:", data.jobs);
+
+      if (data && Array.isArray(data.jobs)) {
+        setGetJob(data.jobs);
+        console.log("📊 Jobs loaded:", data.jobs.length);
+      } else {
+        console.warn("⚠️ No jobs data in response:", data);
+        setGetJob([]);
+      }
     } catch (err) {
-      console.error("Error fetching jobs:", err);
+      console.error("❌ Error fetching current jobs:", err);
+      toast.error(
+        `Failed to fetch current jobs: ${
+          err.response?.data?.message || err.message || "Unknown error"
+        }`
+      );
+      setGetJob([]);
     } finally {
-      setLoading(false); // hide loader
+      setLoading(false);
     }
   };
-  
-  useEffect(() => {
-    if (qpUserId) {
-      localStorage.setItem("userId", qpUserId);
-      console.log("Saved userId:", qpUserId);
-    }
-  }, [qpUserId]);
-  
+
   useEffect(() => {
     getJobs();
-  }, [userId]); // Re-fetch when userId changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
 
   const openConfirmModal = (job, action) => {
     setSelectedJob(job);
@@ -72,29 +77,29 @@ export default function MemberApprove() {
 
   const confirmAction = async () => {
     if (selectedJob && selectedAction) {
-      closeConfirmModal(); // Close modal immediately when action starts
+      closeConfirmModal();
       await completedJobs(selectedJob.id, selectedAction);
     }
   };
 
   const completedJobs = async (jobId, action) => {
+    if (!userId) {
+      toast.error("User ID not found. Cannot complete job.");
+      return;
+    }
+
     try {
-      setLoading(true); //
-      const postBody = {
-        jobId: jobId,
-        userId: userId, // Use dynamic user ID from localStorage
-        action: action,
-      };
+      setLoading(true);
+      const postBody = { jobId, userId, action };
       const apiResponse = await axios.post(`${baseUrl}/jobs/action`, postBody);
-      const response = apiResponse.data;
       toast.success(`Job ${action}!`);
       await getJobs();
-      console.log(response);
+      console.log("✅ Job action response:", apiResponse.data);
     } catch (err) {
-      toast.error(`Please try again later`);
-      console.log(err);
+      toast.error("Please try again later");
+      console.error("❌ Error completing job:", err);
     } finally {
-      setLoading(false); // hide loader
+      setLoading(false);
     }
   };
 
@@ -102,16 +107,13 @@ export default function MemberApprove() {
     (job.briefOverview || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const totalPages = Math.ceil(filteredJobs.length / PRODUCTS_PER_PAGE);
-
+  const totalPages = Math.max(1, Math.ceil(filteredJobs.length / PRODUCTS_PER_PAGE));
   const paginatedFilteredJobs = filteredJobs.slice(
     (currentPage - 1) * PRODUCTS_PER_PAGE,
     currentPage * PRODUCTS_PER_PAGE
   );
 
-  const handlePageChange = (event, value) => {
-    setCurrentPage(value);
-  };
+  const handlePageChange = (event, value) => setCurrentPage(value);
 
   return (
     <div className="flex flex-col lg:flex-row h-screen">
@@ -119,19 +121,22 @@ export default function MemberApprove() {
       <ToastContainer />
 
       <div className="p-4 sm:p-6 flex-1 overflow-y-auto">
-        <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-600">My Current Jobs</h2>
+        <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-600">
+          My Current Jobs
+        </h2>
 
-        {/* Header with job count and controls */}
+        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-5">
           <div className="flex flex-col gap-1">
             <div className="text-base font-medium text-gray-600">
               Total Jobs {getJob.length}
             </div>
-         
+            <div className="text-xs text-gray-500">
+              Using User ID: <span className="font-semibold">{userId || "N/A"}</span>
+            </div>
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {/* Search */}
             <input
               type="text"
               placeholder="Search..."
@@ -139,20 +144,10 @@ export default function MemberApprove() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-
-            {/* Filter */}
-            {/* <button className="flex items-center gap-1 border border-gray-300 rounded-md px-3 py-2 text-sm hover:bg-gray-100 w-full sm:w-auto justify-center">
-              <FiFilter /> Filter
-            </button> */}
-
-            {/* Add User
-            <button className="flex items-center gap-1 bg-orange-500 text-white rounded-md px-3 py-2 text-sm hover:bg-orange-600 w-full sm:w-auto justify-center">
-              <FiPlus /> Add User
-            </button> */}
           </div>
         </div>
 
-        {/* Table container */}
+        {/* Table */}
         <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
           <table className="w-full text-sm border-collapse">
             <thead>
@@ -166,7 +161,6 @@ export default function MemberApprove() {
                 <th className="px-4 py-3 border-b border-gray-200">Action</th>
               </tr>
             </thead>
-
             <tbody>
               {loading ? (
                 <tr>
@@ -178,29 +172,18 @@ export default function MemberApprove() {
                 </tr>
               ) : paginatedFilteredJobs.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan="7"
-                    className="text-center font-semibold py-6 sm:py-8 md:py-10 text-gray-500 
-               text-base sm:text-lg md:text-xl lg:text-2xl"
-                  >
-                    No jobs found
+                  <td colSpan="7" className="text-center font-semibold py-6 text-gray-500">
+                    {userId ? "No jobs found" : "User ID not found in localStorage"}
                   </td>
                 </tr>
               ) : (
-                paginatedFilteredJobs.map((job, index) => (
-                  <tr
-                    key={index}
-                    className="hover:bg-gray-50 border-b border-gray-200 text-sm"
-                  >
+                paginatedFilteredJobs.map((job) => (
+                  <tr key={job.id} className="hover:bg-gray-50 border-b border-gray-200 text-sm">
                     <td className="px-4 py-3 align-top text-gray-900">{job.id}</td>
                     <td className="px-4 py-3 align-top">
                       <div className="flex flex-col">
-                        <div className="font-medium text-gray-900">
-                          {job.briefOverview}
-                        </div>
-                        <div className="text-[10px] text-gray-500 mt-1">
-                          {job.date}
-                        </div>
+                        <div className="font-medium text-gray-900">{job.briefOverview}</div>
+                        <div className="text-[10px] text-gray-500 mt-1">{job.date}</div>
                       </div>
                     </td>
                     <td className="px-4 py-3 align-top text-gray-700">{job.venue}</td>
@@ -212,9 +195,11 @@ export default function MemberApprove() {
                         </span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 align-top text-gray-700">{job.intakeDetails || job.intake || "-"}</td>
+                    <td className="px-4 py-3 align-top text-gray-700">
+                      {job.intakeDetails || job.intake || "-"}
+                    </td>
                     <td className="px-4 py-3 align-top text-gray-900 font-medium">
-                      $ {parseInt(job.remuneration || 0).toLocaleString()}
+                      ${parseInt(job.remuneration || 0, 10).toLocaleString()}
                     </td>
                     <td className="px-4 py-3 align-top">
                       <div className="flex gap-2">

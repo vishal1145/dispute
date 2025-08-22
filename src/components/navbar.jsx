@@ -1,11 +1,49 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { NavLink } from "react-router-dom"; // ✅ Import NavLink
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [userName, setUserName] = useState("John");
+  const [userLoading, setUserLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Fetch user data from dashboard API
+  const fetchUserData = async () => {
+    try {
+      setUserLoading(true);
+      const response = await axios.get('https://restapi.algofolks.com/wp-json/wp-rest-api/v1/user/dashboard/14', {
+        headers: {
+          'Cookie': 'PHPSESSID=1doop8s83ovbci3mrracshrud3'
+        }
+      });
+      
+      console.log('User Data API Response:', response.data);
+      
+      // Extract user name from the API response
+      const firstName = response.data?.userInfo?.firstName || 
+                       response.data?.dashboard?.userInfo?.firstName || 
+                       response.data?.user?.firstName || 
+                       "";
+      
+      const lastName = response.data?.userInfo?.lastName || 
+                      response.data?.dashboard?.userInfo?.lastName || 
+                      response.data?.user?.lastName || 
+                      "";
+      
+      const name = firstName && lastName ? `${firstName} ${lastName}` : 
+                   firstName || lastName || "John";
+      
+      setUserName(name);
+    } catch (error) {
+      console.error('User Data API Error:', error);
+      // Keep default name if API fails
+    } finally {
+      setUserLoading(false);
+    }
+  };
 
   // Listen for responses from parent window
   React.useEffect(() => {
@@ -21,6 +59,11 @@ export default function Navbar() {
     return () => {
       window.removeEventListener('message', handleMessage);
     };
+  }, []);
+
+  // Fetch user data on component mount
+  useEffect(() => {
+    fetchUserData();
   }, []);
 
   // const logout = async () => {
@@ -62,9 +105,13 @@ export default function Navbar() {
          
         </div>
 
-        {/* Hello Message */}
+        {/* User Name Message */}
         <div className="px-6 mb-6">
-          <p className="text-white text-lg font-medium">Hello John</p>
+          {userLoading ? (
+            <p className="text-white text-lg font-medium">Loading...</p>
+          ) : (
+            <p className="text-white text-lg font-medium">{userName}</p>
+          )}
         </div>
 
         {/* Links */}

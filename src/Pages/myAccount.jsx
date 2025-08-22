@@ -6,7 +6,6 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
-import { useSearchParams } from "react-router-dom";
 
 /* ---------- Reusable MultiSelect with checkboxes ---------- */
 function MultiSelect({ name, value = [], options = [], placeholder = "Select...", onChange }) {
@@ -54,7 +53,7 @@ function MultiSelect({ name, value = [], options = [], placeholder = "Select..."
             </button>
           </div>
           <ul className="py-1">
-            {options.map((opt, i) => (
+            {(options || []).map((opt, i) => (
               <li
                 key={i}
                 className="px-3 py-2 hover:bg-gray-50 cursor-pointer flex items-center gap-2"
@@ -73,60 +72,67 @@ function MultiSelect({ name, value = [], options = [], placeholder = "Select..."
 
 /* -------------------------- Page -------------------------- */
 export default function MyAccount() {
-  // Use the exact API endpoint you want
   const baseUrl = "https://restapi.algofolks.com/wp-json/wp-rest-api/v1";
+
+  // ✅ Only read userId from localStorage (never set it)
+  const resolveInitialUserId = () => {
+    const fromLS = localStorage.getItem("user_id");
+    // Guard against string "null"/"undefined"
+    if (!fromLS || fromLS === "null" || fromLS === "undefined") return "6";
+    return fromLS;
+  };
+
+  const [userId, setUserId] = useState(resolveInitialUserId);
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState(null);
-  const userId = "6"; // Hardcoded to use user ID 6
 
-  console.log("Base URL:", baseUrl);
-  console.log("Full API URL:", `${baseUrl}/user/${userId}`);
+  // Optional: if user_id changes in another tab, reflect it here (still read-only)
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (e.key === "user_id") {
+        const nv = e.newValue;
+        if (nv && nv !== userId) setUserId(nv);
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, [userId]);
 
-  console.log("Using userId:", userId);
-  console.log("Full fetch URL:", `${baseUrl}/user/${userId}`);
-
-  // Get userId from URL parameters (but don't use it for API calls)
-  const [searchParams] = useSearchParams();
-  const qpUserId = searchParams.get("userId");
-
-  // Initialize form data from accountData
+  // Initialize form schema once
   useEffect(() => {
     const initialData = {};
-    accountData.forEach((field) => {
-      // Make expertise (or any multiple field) an array
-      if (field.name === "expertise" || field.multiple) {
-        initialData[field.name] = [];
-      } else {
-        initialData[field.name] = "";
-      }
+    (accountData || []).forEach((field) => {
+      initialData[field.name] = field.name === "expertise" || field.multiple ? [] : "";
     });
+    
+    // Initialize bank fields separately since they're not in JSON
+    initialData.bankName = "";
+    initialData.bankBranch = "";
+    initialData.bankAccountNumber = "";
+    initialData.bankAccountName = "";
+    
     setFormData(initialData);
   }, []);
 
-  // Note: We're not using localStorage userId anymore - always using "6"
-
-  // Ensure form is always visible even if API fails
+  // Ensure form renders even if API fails
   useEffect(() => {
-    if (!loading && !userData) {
-      setUserData({}); // Set empty user data to ensure form renders
-    }
+    if (!loading && !userData) setUserData({});
   }, [loading, userData]);
 
   const fetchUserProfile = useCallback(async () => {
     try {
       setLoading(true);
       const apiUrl = `${baseUrl}/user/${userId}`;
-      console.log("Fetching from:", apiUrl);
       const { data } = await axios.get(apiUrl);
-      console.log("API Response:", data);
-      const user = data?.user || data;
+      const user = data?.user || data || {};
 
       const expertiseArray = Array.isArray(user.expertise)
         ? user.expertise
-        : (user.expertise ? String(user.expertise).split(",").map((s) => s.trim()).filter(Boolean) : []);
+        : (user.expertise
+            ? String(user.expertise).split(",").map((s) => s.trim()).filter(Boolean)
+            : []);
 
-      // Map API field names to form field names
       const userFormData = {
         firstName: user.firstName || "",
         lastName: user.lastName || "",
@@ -135,11 +141,11 @@ export default function MyAccount() {
         company: user.companyName || "",
         address: user.address || "",
         phone: user.phoneMobile || "",
-        expertise: expertiseArray, // <-- array for multiselect
-        bankName: user.bankName || "",
-        bankBranch: user.bankBranch || "",
-        bankAccountNumber: user.bankAccountNumber || "",
-        bankAccountName: user.bankAccountName || "",
+        expertise: expertiseArray,
+        bankName: user.bank || "",
+        bankBranch: user.branch_bsb || "",
+        bankAccountNumber: user.account_number || "",
+        bankAccountName: user.account_name || "",
         additional: user.addionalInfornation || "",
       };
 
@@ -148,25 +154,21 @@ export default function MyAccount() {
     } catch (err) {
       console.error("Error fetching user profile:", err);
       toast.error("Failed to fetch user profile. You can still update your details.");
-      console.error("Response data:", err.response?.data);
-      console.error("Response status:", err.response?.status);
       setUserData({});
     } finally {
       setLoading(false);
     }
-  }, [baseUrl]);
+  }, [baseUrl, userId]);
 
-  // Fetch user profile on component mount
+  // Fetch profile on mount and whenever userId changes
   useEffect(() => {
     fetchUserProfile();
   }, [fetchUserProfile]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target; // value can be string OR array (from MultiSelect)
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    console.log('Input change:', name, value); // Debug log
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -184,7 +186,6 @@ export default function MyAccount() {
           setLoading(false);
           return;
         }
-
         if (!/^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+$/.test(password)) {
           toast.error("Password contains invalid characters. Please use only letters, numbers, and common symbols.");
           setLoading(false);
@@ -193,7 +194,8 @@ export default function MyAccount() {
       }
 
       const updateData = {
-        userId: userData?.id || Number(userId) || 1,
+        // Prefer backend user id if present, else fallback to the LS value
+        userId: userData?.id || Number(userId) ,
       };
 
       const fieldMapping = {
@@ -204,12 +206,15 @@ export default function MyAccount() {
         address: "address",
         phone: "phoneMobile",
         expertise: "expertise",
-        bankName: "bankName",
-        bankBranch: "bankBranch",
-        bankAccountNumber: "bankAccountNumber",
-        bankAccountName: "bankAccountName",
-        additional: "addionalInfornation", // backend typo
+        bankName: "bank",
+        branch_bsb: "bankBranch",
+        account_number: "bankAccountNumber",
+        account_name: "bankAccountName",
+        additional: "addionalInfornation", // backend typo kept as-is
       };
+      
+      // Debug: Log the exact field mapping being used
+      console.log('Field mapping object:', fieldMapping);
 
       if (formData.password && formData.password.trim() !== "") {
         updateData.password = formData.password.trim();
@@ -230,29 +235,55 @@ export default function MyAccount() {
 
         const dbFieldName = fieldMapping[key] || key;
         updateData[dbFieldName] = typeof val === "string" ? val.trim() : val;
+        
+        // Debug: Log each field being processed
+        console.log(`Processing field: ${key} -> ${dbFieldName} = ${val}`);
+      });
+      
+      // Always include bank fields in update, even if empty
+      // updateData.bankName = formData.bank || "";
+      updateData.branchBsb = formData.bankBranch || "";
+      updateData.accountNumber = formData.bankAccountNumber || "";
+      updateData.accountName = formData.bankAccountName|| "";
+      
+      console.log('Bank fields being sent:', {
+        bankName: updateData.bankName,
+        bankBranch: updateData.bankBranch,
+        bankAccountNumber: updateData.bankAccountNumber,
+        bankAccountName: updateData.bankAccountName
       });
 
       const updateUrl = `${baseUrl}/user/profile/update`;
-      console.log("Sending update request to:", updateUrl);
-      console.log("Update data:", updateData);
-
+      
+      // Debug: Log what we're sending to the API
+      console.log('Sending update data to API:', updateData);
+      console.log('Bank fields in formData:', {
+        bankName: formData.bankName,
+        bankBranch: formData.bankBranch,
+        bankAccountNumber: formData.bankAccountNumber,
+        bankAccountName: formData.bankAccountName
+      });
+      
+     
+      
       const response = await axios.put(updateUrl, updateData);
 
       if (response.status === 200) {
         toast.success("Profile updated successfully!");
+        console.log('API Response:', response.data);
+        console.log('API Response Status:', response.status);
+        console.log('API Response Headers:', response.headers);
         await fetchUserProfile();
       }
     } catch (err) {
       console.error("Error updating profile:", err);
-      console.error("Response data:", err.response?.data);
-      console.error("Response status:", err.response?.status);
       toast.error(`Failed to update profile: ${err.response?.data?.message || err.message}`);
     } finally {
       setLoading(false);
     }
   };
 
-  // Remove the blocking loading state - form will always show
+  // Loading shell (non-blocking form below still shows an overlay)
   if (loading && !userData) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -289,11 +320,15 @@ export default function MyAccount() {
             If required, please update your details and click the Update button.
           </p>
 
+        
+
+
+
           <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {accountData.map((field, index) => (
-              <div key={index} className={`${field.fullWidth ? "sm:col-span-2" : ""}`}>
-                {/* Don't show regular label for bank fields - they have special heading */}
-                {field.type !== "bank" && (
+            {(accountData || []).map((field, index) => (
+              <div key={index} className={field.fullWidth ? "sm:col-span-2" : ""}>
+                {/* Show label for all fields except bankName which has custom heading */}
+                {field.name !== "bankName" && (
                   <label className="block text-xs uppercase tracking-wide font-medium mb-2 text-gray-600">
                     {field.label}
                   </label>
@@ -309,7 +344,7 @@ export default function MyAccount() {
                     className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
                   />
                 ) : field.type === "select" ? (
-                  // 👇 Multi-select for "expertise" (or any field with field.multiple = true)
+                  // Multi-select for "expertise" (or any field with field.multiple = true)
                   field.name === "expertise" || field.multiple ? (
                     <MultiSelect
                       name={field.name}
@@ -332,30 +367,7 @@ export default function MyAccount() {
                       ))}
                     </select>
                   )
-                ) : field.type === "bank" ? (
-                  <div className="space-y-3">
-                    {/* Bank details heading with special styling */}
-                    <div className="mb-4">
-                      <label className="block text-xl font-bold text-gray-800">
-                        {field.label}
-                      </label>
-                    </div>
-                    {(field.subFields || []).map((subField, subIndex) => (
-                      <div key={subIndex}>
-                        <label className="block text-xs uppercase tracking-wide font-medium mb-2 text-gray-600">
-                          {subField.label}
-                        </label>
-                        <input
-                          type={subField.type}
-                          name={subField.name}
-                          value={formData[subField.name] || ""}
-                          onChange={handleInputChange}
-                          placeholder={subField.placeholder || ""}
-                          className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                    ))}
-                  </div>
+
                 ) : (
                   <input
                     type={field.type}
@@ -369,6 +381,93 @@ export default function MyAccount() {
               </div>
             ))}
 
+            {/* Additional Information Section - Left Side */}
+            {/* <div className="sm:col-span-1">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">Additional Information</h3>
+              
+              <div>
+                <label className="block text-xs uppercase tracking-wide font-medium mb-2 text-gray-600">
+                  Additional Information
+                </label>
+                <textarea
+                  name="additional"
+                  value={formData.additional || ""}
+                  onChange={handleInputChange}
+                  placeholder="degrees, professions, areas of expertise, lawyer etc"
+                  rows="6"
+                  className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+                />
+              </div>
+            </div> */}
+
+            {/* Bank Details Section - Right Side */}
+            <div className="sm:col-span-1">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">Bank Details</h3>
+              
+              <div className="space-y-4">
+                {/* Bank Name */}
+                <div>
+                  <label className="block text-xs uppercase tracking-wide font-medium mb-2 text-gray-600">
+                    Bank Name
+                  </label>
+                  <input
+                    type="text"
+                    name="bankName"
+                    value={formData.bankName || ""}
+                    onChange={handleInputChange}
+                    placeholder="Enter Bank Name"
+                    className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                {/* Branch/BSB */}
+                <div>
+                  <label className="block text-xs uppercase tracking-wide font-medium mb-2 text-gray-600">
+                    Branch/BSB
+                  </label>
+                  <input
+                    type="text"
+                    name="bankBranch"
+                    value={formData.bankBranch || ""}
+                    onChange={handleInputChange}
+                    placeholder="Enter Branch or BSB Code"
+                    className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                {/* Account Number */}
+                <div>
+                  <label className="block text-xs uppercase tracking-wide font-medium mb-2 text-gray-600">
+                    Account Number
+                  </label>
+                  <input
+                    type="text"
+                    name="bankAccountNumber"
+                    value={formData.bankAccountNumber || ""}
+                    onChange={handleInputChange}
+                    placeholder="Enter Account Number"
+                    className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                {/* Account Name */}
+                <div>
+                  <label className="block text-xs uppercase tracking-wide font-medium mb-2 text-gray-600">
+                    Account Name
+                  </label>
+                  <input
+                    type="text"
+                    name="bankAccountName"
+                    value={formData.bankAccountName || ""}
+                    onChange={handleInputChange}
+                    placeholder="Enter Account Holder Name"
+                    className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+            </div>
+        
+
             {/* Button Row */}
             <div className="col-span-1 sm:col-span-2 flex justify-center sm:justify-start mt-6">
               <button
@@ -380,8 +479,6 @@ export default function MyAccount() {
               </button>
             </div>
           </form>
-
-       
         </div>
       </div>
     </div>
