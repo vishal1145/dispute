@@ -114,6 +114,7 @@ export default function MemberApprove() {
       job.address?.toLowerCase().includes(search) ||
       job.resolution?.toLowerCase().includes(search) ||
       job.numberOfJobs?.toString().includes(search) ||
+      job.expertise?.toLowerCase().includes(search) || 
       job.jobStatistics?.completedJobs?.toString().includes(search)
     );
   });
@@ -182,9 +183,9 @@ export default function MemberApprove() {
                 <th className="px-4 py-3 border-b border-gray-200">
                   License Number
                 </th>
-                {/* <th className="px-4 py-3 border-b border-gray-200">
-                  Resolution Field
-                </th> */}
+                <th className="px-4 py-3 border-b border-gray-200">
+                  Expertise Field
+                </th>
                 <th className="px-4 py-3 border-b border-gray-200">Action</th>
               </tr>
             </thead>
@@ -225,7 +226,7 @@ export default function MemberApprove() {
                               onClick={() => handleNavigate(job.id)}
                               className="font-medium text-gray-900 cursor-pointer"
                             >
-                              {fullName || "-"} 
+                              {fullName || "-"}
                             </div>
                             <div className="text-[10px] text-gray-500 mt-1">
                               ({job.jobStatistics?.completedJobs})
@@ -252,9 +253,9 @@ export default function MemberApprove() {
                       <td className="px-4 py-3 align-top text-gray-700">
                         {job.licenseNumber || "-"}
                       </td>
-                      {/* <td className="px-4 py-3 align-top text-gray-700">
-                        {job.jobStatistics.userJobs.resolutionField || "-"}
-                      </td> */}
+                      <td className="px-4 py-3 align-top text-gray-700">
+                        {job.expertise || "-"}
+                      </td>
 
                       <td className="px-4 py-3 align-top">
                         {job.status === "inactive" ? (

@@ -80,7 +80,7 @@ export default function Header() {
         <div className="px-6 mb-6">
           <p className="text-white text-lg font-medium">
             {" "}
-            Hello {adminName?.firstName} ( Admin ){" "}
+            Hello {adminName?.firstName} (Admin)
           </p>
         </div>
 
