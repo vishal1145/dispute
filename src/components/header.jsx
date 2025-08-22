@@ -61,7 +61,7 @@ export default function Navbar() {
 
         {/* Hello Message */}
         <div className="px-6 mb-6">
-          <p className="text-white text-lg font-medium">Hello Aman (Admin)</p>
+          <p className="text-white text-lg font-medium">Hello Admin</p>
         </div>
 
         {/* Links */}
