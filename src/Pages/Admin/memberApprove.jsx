@@ -126,7 +126,6 @@ export default function MemberApprove() {
   const handlePageChange = (_e, value) => setCurrentPage(value);
 
   const handleNavigate = (id) => {
-    debugger;
     navigate(`/admin/account?member_id=${id}`); // 👈 route to Admin Account page
     // navigate(`/admin/account`); // 👈 route to Admin Account page
   };

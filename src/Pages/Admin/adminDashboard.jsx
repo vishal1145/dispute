@@ -20,6 +20,12 @@ export default function Dashboard() {
     // setMembers(statistics.members);
     setMembersByState(AdminDashboard.membersByState);
     setJobsByWeek(AdminDashboard.jobsByWeek);
+    const params = new URLSearchParams(window.location.search);
+    const userId = params.get("user_id");
+    if (userId) {
+      localStorage.setItem("user_id", userId);
+      console.log("User ID saved:", userId);
+    }
   }, []);
 
   const handleDashboard = async () => {

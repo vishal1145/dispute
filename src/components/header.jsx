@@ -2,10 +2,16 @@ import React, { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { NavLink } from "react-router-dom"; // ✅ Import NavLink
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 
-export default function Navbar() {
+export default function Header() {
+  const baseUrl = process.env.REACT_APP_Base_Url;
   const [isOpen, setIsOpen] = useState(false);
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const [adminName, setAdminName] = useState({});
 
   // Listen for responses from parent window
   React.useEffect(() => {
@@ -23,9 +29,20 @@ export default function Navbar() {
     };
   }, []);
 
-  // const logout = async () => {
-  //   window.location.href = "https://disputesresolutions.com";
-  // };
+  const fetchName = async () => {
+    try {
+      // setLoading(true);
+      const userId = localStorage.getItem("user_id"); // ✅ fixed
+      const { data } = await axios.get(`${baseUrl}/user/${userId}`);
+      setAdminName(data || {});
+    } catch (err) {
+      console.error("Error fetching jobs:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchName();
+  }, []);
 
   return (
     <>
@@ -61,7 +78,10 @@ export default function Navbar() {
 
         {/* Hello Message */}
         <div className="px-6 mb-6">
-          <p className="text-white text-lg font-medium">Hello Admin</p>
+          <p className="text-white text-lg font-medium">
+            {" "}
+            Hello {adminName?.firstName} ( Admin ){" "}
+          </p>
         </div>
 
         {/* Links */}
@@ -97,7 +117,7 @@ export default function Navbar() {
           >
             Create Job
           </NavLink>
-            <NavLink
+          <NavLink
             to="/admin/member-list"
             className={({ isActive }) =>
               isActive
@@ -118,7 +138,7 @@ export default function Navbar() {
                 try {
                   window.parent.location.href = `${SITE_URL}?logout=true`;
                 } catch (error) {
-                  alert("Error redirecting: " + error.message);
+                  console.log("Error redirecting: " + error.message);
                 }
               }
             }}

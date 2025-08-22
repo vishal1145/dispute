@@ -134,7 +134,7 @@ export default function Navbar() {
                 try {
                   window.parent.location.href = `${SITE_URL}?logout=true`;
                 } catch (error) {
-                  alert('Error redirecting: ' + error.message);
+                  console.log('Error redirecting: ' + error.message);
                 }
               }
             }}

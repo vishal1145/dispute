@@ -165,16 +165,11 @@ export default function Account() {
                 <label className="block text-sm font-medium mb-2 text-gray-600">
                   Expertise
                 </label>
-                <select
+                <input
                   value={userData?.expertise || ""}
                   // disabled
                   className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm"
-                >
-                  <option value="">Select Expertise</option>
-                  <option value="Mediation">Mediation</option>
-                  <option value="Arbitration">Arbitration</option>
-                  <option value="Both">Both</option>
-                </select>
+                />
               </div>
 
               {/* Additional Info */}
