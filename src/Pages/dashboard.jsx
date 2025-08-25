@@ -11,6 +11,7 @@ import {
   DollarSign
 } from "lucide-react";
 import axios from "axios";
+import { Box, CircularProgress } from "@mui/material";
 
 import { useSearchParams } from "react-router-dom";
 
@@ -191,110 +192,70 @@ export default function Dashboard() {
            */}
                       {/* Debug Info - Show API data */}
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Admin Stat Cards */}
-            <div className="bg-emerald-50 rounded-xl p-6 border border-emerald-200 shadow-sm">
-              <div className="flex flex-col">
-                <div className="text-2xl text-emerald-600 mb-3">
-                  <Users className="w-6 h-6" />
-                </div>
-                <div className="flex-1">
-                  {dashboardLoading ? (
-                    <div className="flex items-center justify-center h-16">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                    </div>
-                  ) : (
-                    <>
-                      <p className="text-3xl font-bold text-gray-900 mb-2">
-                        {dashboardStats?.dashboard?.availableJobs?.count || dashboardStats?.availableJobs?.count || "0"}
-                      </p>
-                      <p className="text-sm font-medium text-gray-700">Available Jobs</p>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-sky-50 rounded-xl p-6 border border-sky-200 shadow-sm">
-              <div className="flex flex-col">
-                <div className="text-2xl text-sky-600 mb-3">
-                  <CheckCircle className="w-6 h-6" />
-                </div>
-                <div className="flex-1">
-                  {dashboardLoading ? (
-                    <div className="flex items-center justify-center h-16">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                    </div>
-                  ) : (
-                    <>
-                      <p className="text-3xl font-bold text-gray-900 mb-2">
-                        {dashboardStats?.dashboard?.totalJobsCompleted || dashboardStats?.totalJobsCompleted || "0"}
-                      </p>
-                      <p className="text-sm font-medium text-gray-700">Total Jobs Done</p>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-violet-50 rounded-xl p-6 border border-violet-200 shadow-sm">
-              <div className="flex flex-col">
-                <div className="text-2xl text-violet-600 mb-3">
-                  <Calendar className="w-6 h-6" />
-                </div>
-                <div className="flex-1">
-                  {dashboardLoading ? (
-                    <div className="flex items-center justify-center h-16">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                    </div>
-                  ) : (
-                    <>
-                      <p className="text-3xl font-bold text-gray-900 mb-2">
-                        {dashboardStats?.dashboard?.pastMonthJobs?.count || dashboardStats?.pastMonthJobs?.count || "0"}
-                      </p>
-                      <p className="text-sm font-medium text-gray-700">Past Month Jobs</p>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* <div className="bg-amber-50 rounded-xl p-6 border border-amber-200 shadow-sm">
-              <div className="flex flex-col">
-                <div className="text-2xl text-amber-600 mb-3">
-                  <DollarSign className="w-6 h-6" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-3xl font-bold text-gray-900 mb-2">$45,600</p>
-                  <p className="text-sm font-medium text-gray-700">Total Earnings</p>
-                </div>
-              </div>
-            </div> */}
-
-            {/* <div className="bg-orange-50 rounded-xl p-6 border border-orange-200 shadow-sm">
-              <div className="flex flex-col">
-                <div className="text-2xl text-orange-600 mb-3">
-                  <Clock className="w-6 h-6" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-3xl font-bold text-gray-900 mb-2">8</p>
-                  <p className="text-sm font-medium text-gray-700">Upcoming Booked</p>
-                </div>
-              </div>
-            </div> */}
-
-            {/* <div className="bg-indigo-50 rounded-xl p-6 border border-indigo-200 shadow-sm">
-              <div className="flex flex-col">
-                <div className="text-2xl text-indigo-600 mb-3">
-                  <Users className="w-6 h-6" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-3xl font-bold text-gray-900 mb-2">42</p>
-                  <p className="text-sm font-medium text-gray-700">Active Members</p>
-                </div>
-              </div>
-            </div> */}
+         {/* Stats Grid */}
+<div className="mb-8">
+  {dashboardLoading ? (
+         // 🔵 centered loader (page section loader)
+     <div className="">
+       <div className="flex items-center justify-center h-32">
+         <Box sx={{ display: "flex" }}>
+           <CircularProgress />
+         </Box>
+       </div>
+     </div>
+  ) : (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Available Jobs */}
+      <div className="bg-emerald-50 rounded-xl p-6 border border-emerald-200 shadow-sm">
+        <div className="flex flex-col">
+          <div className="text-2xl text-emerald-600 mb-3">
+            <Users className="w-6 h-6" />
           </div>
+          <div className="flex-1">
+            <p className="text-3xl font-bold text-gray-900 mb-2">
+              {dashboardStats?.dashboard?.availableJobs?.count ||
+               dashboardStats?.availableJobs?.count || "0"}
+            </p>
+            <p className="text-sm font-medium text-gray-700">Available Jobs</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Total Jobs Done */}
+      <div className="bg-sky-50 rounded-xl p-6 border border-sky-200 shadow-sm">
+        <div className="flex flex-col">
+          <div className="text-2xl text-sky-600 mb-3">
+            <CheckCircle className="w-6 h-6" />
+          </div>
+          <div className="flex-1">
+            <p className="text-3xl font-bold text-gray-900 mb-2">
+              {dashboardStats?.dashboard?.totalJobsCompleted ||
+               dashboardStats?.totalJobsCompleted || "0"}
+            </p>
+            <p className="text-sm font-medium text-gray-700">Total Jobs Done</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Past Month Jobs */}
+      <div className="bg-violet-50 rounded-xl p-6 border border-violet-200 shadow-sm">
+        <div className="flex flex-col">
+          <div className="text-2xl text-violet-600 mb-3">
+            <Calendar className="w-6 h-6" />
+          </div>
+          <div className="flex-1">
+            <p className="text-3xl font-bold text-gray-900 mb-2">
+              {dashboardStats?.dashboard?.pastMonthJobs?.count ||
+               dashboardStats?.pastMonthJobs?.count || "0"}
+            </p>
+            <p className="text-sm font-medium text-gray-700">Past Month Jobs</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )}
+</div>
+
         </div>
         {/* Member Dashboard Section */}
         <div className=" grid-cols-1 lg:grid-cols-2 gap-8 mb-8 hidden">

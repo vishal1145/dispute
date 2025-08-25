@@ -42,6 +42,21 @@ export default function MemberApprove() {
       setLoading(true);
       const { data } = await axios.get(`${baseUrl}/users`);
       setUsers(data.users || []);
+      
+      // Debug: Log expertise fields to see what data we have
+      if (data.users && data.users.length > 0) {
+        const expertiseFields = [...new Set(data.users.map(user => user.expertise).filter(Boolean))];
+        console.log("Available expertise fields:", expertiseFields);
+        console.log("Total users loaded:", data.users.length);
+        
+        // Log first few users to see their expertise values
+        console.log("Sample users expertise:", data.users.slice(0, 5).map(u => ({
+          id: u.id,
+          name: `${u.firstName} ${u.lastName}`,
+          expertise: u.expertise,
+          status: u.status
+        })));
+      }
     } catch (err) {
       console.error("Error fetching users:", err);
     } finally {
@@ -118,12 +133,17 @@ export default function MemberApprove() {
       job.jobStatistics?.completedJobs?.toString().includes(search);
 
     // field filter
-    const matchesField = !searchField || 
-      (job.expertise || "").toLowerCase() === searchField.toLowerCase();
+    const matchesField = !searchField || searchField === "" || 
+      (job.expertise && job.expertise.toLowerCase().includes(searchField.toLowerCase()));
 
     // location filter
     const matchesLocation = !searchLocation || 
       (job.address || "").toLowerCase().includes(searchLocation.toLowerCase());
+
+    // Debug logging for field filter
+    if (searchField && searchField !== "") {
+      console.log(`Field filter debug: searchField="${searchField}", job.expertise="${job.expertise}", matchesField=${matchesField}`);
+    }
 
     return matchesSearch && matchesField && matchesLocation;
   });
@@ -158,11 +178,7 @@ export default function MemberApprove() {
             <h2 className="text-xl sm:text-2xl font-bold text-gray-600">
               Total Members: {users?.length || 0}
             </h2>
-            {searchedJobs.length !== users.length && (
-              <div className="text-sm text-gray-600">
-                Showing {searchedJobs.length} of {users.length} members
-              </div>
-            )}
+            
           </div>
           <div className="flex flex-wrap gap-2">
             {/* Search by Alphabetical */}
@@ -188,11 +204,12 @@ export default function MemberApprove() {
               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 w-full sm:w-auto"
               disabled={uploading}
             >
-              <option value="">All Fields</option>
+              <option value="">Expertise</option>
               <option value="Mediation">Mediation</option>
               <option value="Arbitration">Arbitration</option>
               <option value="Conciliation">Conciliation</option>
               <option value="Negotiation">Negotiation</option>
+              <option value="Facilitation">Facilitation</option>
               <option value="Legal">Legal</option>
             </select>
 
@@ -223,6 +240,9 @@ export default function MemberApprove() {
                 Clear Search
               </button>
             )}
+            
+            {/* Debug Button */}
+           
           </div>
         </div>
 

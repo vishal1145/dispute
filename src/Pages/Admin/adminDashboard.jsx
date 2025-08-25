@@ -202,12 +202,12 @@ export default function Dashboard() {
                       </p>
                       <p>{month.jobsCompleted}</p>
                     </div>
-                    <div className="flex gap-2">
+                    {/* <div className="flex gap-2">
                       <p className="font-medium text-gray-700 text-sm sm:text-base">
                         Booked Jobs :
                       </p>
                       <p>{month.jobsBooked}</p>
-                    </div>
+                    </div> */}
                     <div className="flex gap-2">
                       <p className="font-medium text-gray-700 text-sm sm:text-base">
                         Aborted Jobs :
@@ -233,12 +233,12 @@ export default function Dashboard() {
                       </p>
                       <p>{weeks.jobsCompleted}</p>
                     </div>
-                    <div className="flex gap-2">
+                    {/* <div className="flex gap-2">
                       <p className="font-medium text-gray-700 text-sm sm:text-base">
                         Booked Jobs :
                       </p>
                       <p>{weeks.jobsBooked}</p>
-                    </div>
+                    </div> */}
                     <div className="flex gap-2">
                       <p className="font-medium text-gray-700 text-sm sm:text-base">
                         Aborted Jobs :
