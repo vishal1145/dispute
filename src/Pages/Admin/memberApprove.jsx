@@ -29,6 +29,8 @@ export default function MemberApprove() {
   const [users, setUsers] = useState([]);
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchField, setSearchField] = useState("");
+  const [searchLocation, setSearchLocation] = useState("");
   const [uploading, setUploading] = useState(false); // button text only
   const [open, setOpen] = useState(false);
   const [selectedAction, setSelectedAction] = useState(null);
@@ -93,7 +95,7 @@ export default function MemberApprove() {
     setSelectedAction(null);
     setSelectedUserId(null);
   };
-  // Assuming jobs is your full jobs array
+  // Filter based on search criteria
   const searchedJobs = users.filter((job) => {
     const search = searchTerm.toLowerCase();
 
@@ -105,22 +107,36 @@ export default function MemberApprove() {
       return false;
     }
 
-    // search filter
-    return (
-      `${job.firstName || ""} ${job.lastName || ""}`
-        .toLowerCase()
-        .includes(search) ||
+    // alphabetical search filter
+    const matchesSearch = !searchTerm || 
+      `${job.firstName || ""} ${job.lastName || ""}`.toLowerCase().includes(search) ||
       job.title?.toLowerCase().includes(search) ||
       job.address?.toLowerCase().includes(search) ||
       job.resolution?.toLowerCase().includes(search) ||
       job.numberOfJobs?.toString().includes(search) ||
       job.expertise?.toLowerCase().includes(search) || 
-      job.jobStatistics?.completedJobs?.toString().includes(search)
-    );
+      job.jobStatistics?.completedJobs?.toString().includes(search);
+
+    // field filter
+    const matchesField = !searchField || 
+      (job.expertise || "").toLowerCase() === searchField.toLowerCase();
+
+    // location filter
+    const matchesLocation = !searchLocation || 
+      (job.address || "").toLowerCase().includes(searchLocation.toLowerCase());
+
+    return matchesSearch && matchesField && matchesLocation;
   });
 
-  const totalPages = Math.ceil(searchedJobs.length / PRODUCTS_PER_PAGE);
-  const paginatedFilteredJobs = searchedJobs.slice(
+  // Sort by job count (members with most jobs first)
+  const sortedJobs = searchedJobs.sort((a, b) => {
+    const aJobCount = parseInt(a.jobStatistics?.completedJobs || 0);
+    const bJobCount = parseInt(b.jobStatistics?.completedJobs || 0);
+    return bJobCount - aJobCount; // Most jobs first
+  });
+
+  const totalPages = Math.ceil(sortedJobs.length / PRODUCTS_PER_PAGE);
+  const paginatedFilteredJobs = sortedJobs.slice(
     (currentPage - 1) * PRODUCTS_PER_PAGE,
     currentPage * PRODUCTS_PER_PAGE
   );
@@ -138,13 +154,21 @@ export default function MemberApprove() {
 
       <div className="p-4 sm:p-6 flex-1 overflow-x-auto">
         <div className="flex justify-between items-center mb-3">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-600">
-            Total Members
-          </h2>
+          <div className="flex flex-col gap-2">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-600">
+              Total Members: {users?.length || 0}
+            </h2>
+            {searchedJobs.length !== users.length && (
+              <div className="text-sm text-gray-600">
+                Showing {searchedJobs.length} of {users.length} members
+              </div>
+            )}
+          </div>
           <div className="flex flex-wrap gap-2">
+            {/* Search by Alphabetical */}
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search by name, title, address..."
               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 w-full sm:w-auto"
               value={searchTerm}
               onChange={(e) => {
@@ -154,15 +178,51 @@ export default function MemberApprove() {
               disabled={uploading}
             />
 
+            {/* Search by Field */}
+            <select
+              value={searchField}
+              onChange={(e) => {
+                setSearchField(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 w-full sm:w-auto"
+              disabled={uploading}
+            >
+              <option value="">All Fields</option>
+              <option value="Mediation">Mediation</option>
+              <option value="Arbitration">Arbitration</option>
+              <option value="Conciliation">Conciliation</option>
+              <option value="Negotiation">Negotiation</option>
+              <option value="Legal">Legal</option>
+            </select>
+
+            {/* Search by Location */}
+         
+
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 w-full sm:w-auto"
             >
               <option value="all">All</option>
-              <option value="active">Active</option>
-              <option value="reject">Reject</option>
+              <option value="active">Approved</option>
+              <option value="reject">Rejected</option>
             </select>
+
+            {/* Clear Search Button */}
+            {(searchTerm || searchField || searchLocation) && (
+              <button
+                onClick={() => {
+                  setSearchTerm("");
+                  setSearchField("");
+                  setSearchLocation("");
+                  setCurrentPage(1);
+                }}
+                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+              >
+                Clear Search
+              </button>
+            )}
           </div>
         </div>
 
@@ -186,6 +246,7 @@ export default function MemberApprove() {
                 <th className="px-4 py-3 border-b border-gray-200">
                   Expertise Field
                 </th>
+                <th className="px-4 py-3 border-b border-gray-200">State</th>
                 <th className="px-4 py-3 border-b border-gray-200">Action</th>
               </tr>
             </thead>
@@ -193,7 +254,7 @@ export default function MemberApprove() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="7" className="text-center py-10">
+                  <td colSpan="8" className="text-center py-10">
                     <Box sx={{ display: "flex", justifyContent: "center" }}>
                       <CircularProgress />
                     </Box>
@@ -202,7 +263,7 @@ export default function MemberApprove() {
               ) : paginatedFilteredJobs.length === 0 ? (
                 <tr>
                   <td
-                    colSpan="7"
+                    colSpan="8"
                     className="text-center font-semibold py-10 text-gray-500"
                   >
                     No records found
@@ -221,15 +282,15 @@ export default function MemberApprove() {
                     >
                       <td className="px-4 py-3 align-top">
                         <div className="flex flex-col">
-                          <div className="flex gap-2 text-center items-end">
+                          <div className="flex gap-2 text-center items-center">
                             <div
                               onClick={() => handleNavigate(job.id)}
-                              className="font-medium text-gray-900 cursor-pointer"
+                              className="font-medium text-gray-900 cursor-pointer hover:text-orange-600"
                             >
                               {fullName || "-"}
                             </div>
-                            <div className="text-[10px] text-gray-500 mt-1">
-                              ({job.jobStatistics?.completedJobs})
+                            <div className="text-sm font-semibold text-orange-600 bg-orange-100 px-2 py-1 rounded-full">
+                              ({job.jobStatistics?.completedJobs || 0})
                             </div>
                           </div>
                           <div className="text-[10px] text-gray-500 mt-1">
@@ -255,6 +316,10 @@ export default function MemberApprove() {
                       </td>
                       <td className="px-4 py-3 align-top text-gray-700">
                         {job.expertise || "-"}
+                      </td>
+
+                      <td className="px-4 py-3 align-top text-gray-700">
+                        {job.state || job.address?.split(',').pop()?.trim() || "-"}
                       </td>
 
                       <td className="px-4 py-3 align-top">
@@ -296,7 +361,7 @@ export default function MemberApprove() {
                                   : "bg-gray-500"
                               }`}
                             ></span>
-                            {toTitle(job.status)}
+                            {job.status === "active" ? "Approved" : job.status === "reject" ? "Rejected" : toTitle(job.status)}
                           </span>
                         )}
                       </td>

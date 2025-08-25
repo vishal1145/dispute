@@ -64,7 +64,7 @@ export default function Navbar() {
   }, []);
 
   // Get userId from localStorage
-  const [userId, setUserId] = useState(() => localStorage.getItem("user_id") || "6");
+  const [userId, setUserId] = useState(() => localStorage.getItem("user_id") );
 
   // Fetch user data on component mount and when userId changes
   useEffect(() => {
@@ -115,11 +115,11 @@ export default function Navbar() {
         {/* Logo */}
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <img
-            src="/images/logo.webp"
-            alt="Dispute Resolutions"
-            className="w-20 h-20 object-contain mb-3 mr-20 "
-          />
+        <img
+  src="/images/logo.webp"
+  alt="Dispute Resolutions"
+  className="w-[200px] h-[200px] object-contain mb-3 mr-5"
+/>
          
         </div>
 

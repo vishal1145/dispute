@@ -15,6 +15,12 @@ export default function Dashboard() {
   const [month, setMonth] = useState("");
   const [weeks, setWeeks] = useState("");
   const [loading, setLoading] = useState(false); // single loader in list
+  const [stateData, setStateData] = useState({
+    NSW: 0, VIC: 0, QLD: 0, SA: 0, WA: 0, TAS: 0, NT: 0, Other: 0
+  });
+  const [categoryData, setCategoryData] = useState({
+    Mediation: 0, Conciliation: 0, Arbitration: 0, Negotiation: 0, Facilitation: 0
+  });
 
   useEffect(() => {
     // setMembers(statistics.members);
@@ -44,6 +50,8 @@ export default function Dashboard() {
     handleDashboard();
     monthlyJObs();
     weeklyJobs();
+    fetchMembersByState();
+    fetchMembersByCategory();
   }, []);
 
   const monthlyJObs = async () => {
@@ -65,6 +73,32 @@ export default function Dashboard() {
       setWeeks(data?.analytics || {});
     } catch (err) {
       console.error("Error fetching jobs:", err);
+    }
+  };
+
+  const fetchMembersByState = async () => {
+    try {
+      const { data } = await axios.get(`${baseUrl}/stats/members/by-state`);
+      console.log("API Response for members by state:", data);
+      if (data?.stateCounts) {
+        console.log("Setting state data:", data.stateCounts);
+        setStateData(data.stateCounts);
+      }
+    } catch (err) {
+      console.error("Error fetching members by state:", err);
+    }
+  };
+
+  const fetchMembersByCategory = async () => {
+    try {
+      const { data } = await axios.get(`${baseUrl}/stats/members/by-expertise`);
+      console.log("API Response for members by expertise:", data);
+      if (data?.expertiseCounts) {
+        console.log("Setting category data:", data.expertiseCounts);
+        setCategoryData(data.expertiseCounts);
+      }
+    } catch (err) {
+      console.error("Error fetching members by expertise:", err);
     }
   };
 
@@ -129,7 +163,7 @@ export default function Dashboard() {
                   {members.activeMembers}
                 </h1>
                 <p className="font-medium text-gray-700 text-sm sm:text-base">
-                  Active Members
+                 Approved  Members
                 </p>
               </div>
 
@@ -216,35 +250,84 @@ export default function Dashboard() {
               </div>
             </div>
 
+            {/* Debug Section - Remove this after testing */}
+            
+
             {/* Members by State */}
-            {/* <div className="bg-white shadow rounded-2xl p-4">
+            <div className="bg-white shadow rounded-2xl p-4">
               <h3 className="text-base sm:text-lg font-semibold text-gray-600 mb-3">
                 Members by State
               </h3>
-              <ul className="space-y-4">
-                {membersByState.map((s, idx) => (
-                  <li
-                    key={idx}
-                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
-                  >
-                    <span className="font-medium text-sm sm:text-base">
-                      {s.state}
-                    </span>
-                    <div className="flex-1 bg-gray-200 h-3 rounded relative overflow-hidden">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[
+                  { state: "NSW", count: stateData.NSW },
+                  { state: "VIC", count: stateData.VIC },
+                  { state: "QLD", count: stateData.QLD },
+                  { state: "SA", count: stateData.SA },
+                  { state: "WA", count: stateData.WA },
+                  { state: "TAS", count: stateData.TAS },
+                  { state: "NT", count: stateData.NT },
+                  { state: "Other", count: stateData.Other }
+                ].map((stateInfo, idx) => (
+                  <div key={idx} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-medium text-sm text-gray-700">
+                        {stateInfo.state}
+                      </span>
+                      <span className="text-lg font-bold text-blue-600">
+                        {stateInfo.count}
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
                       <div
-                        className="bg-blue-500 h-3 rounded"
+                        className="bg-blue-500 h-2 rounded-full transition-all duration-300"
                         style={{
-                          width: `${(s.count / stats.totalMembers) * 100}%`,
+                          width: `${(stateInfo.count / Math.max(stats.totalMembers || 1, 1)) * 100}%`,
                         }}
                       ></div>
                     </div>
-                    <span className="text-gray-600 text-sm sm:text-base">
-                      {s.count}
-                    </span>
-                  </li>
+                  </div>
                 ))}
-              </ul>
-            </div> */}
+              </div>
+            </div>
+
+            {/* Debug Section for Category Data - Remove after testing */}
+           
+
+            {/* Members by Category */}
+            <div className="bg-white shadow rounded-2xl p-4">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-600 mb-3">
+                Members by Category
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[
+                  { category: "Mediation", count: categoryData.Mediation || categoryData.mediation || 0, color: "bg-blue-500" },
+                  { category: "Conciliation", count: categoryData.Conciliation || categoryData.conciliation || 0, color: "bg-green-500" },
+                  { category: "Arbitration", count: categoryData.Arbitration || categoryData.arbitration || 0, color: "bg-purple-500" },
+                  { category: "Negotiation", count: categoryData.Negotiation || categoryData.negotiation || 0, color: "bg-orange-500" },
+                  { category: "Facilitation", count: categoryData.Facilitation || categoryData.facilitation || 0, color: "bg-red-500" }
+                ].map((categoryInfo, idx) => (
+                  <div key={idx} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-medium text-sm text-gray-700">
+                        {categoryInfo.category}
+                      </span>
+                      <span className="text-lg font-bold text-gray-800">
+                        {categoryInfo.count}
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+                      <div
+                        className={`${categoryInfo.color} h-2 rounded-full transition-all duration-300`}
+                        style={{
+                          width: `${(categoryInfo.count / Math.max(stats.totalMembers || 1, 1)) * 100}%`,
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
 
             {/* Jobs By Week */}
             {/* <div className="bg-white shadow rounded-2xl p-4">

@@ -111,6 +111,7 @@ export default function MyAccount() {
     initialData.bankBranch = "";
     initialData.bankAccountNumber = "";
     initialData.bankAccountName = "";
+    initialData.state = "";
     
     setFormData(initialData);
   }, []);
@@ -147,6 +148,7 @@ export default function MyAccount() {
         bankAccountNumber: user.account_number || "",
         bankAccountName: user.account_name || "",
         additional: user.addionalInfornation || "",
+        state: user.state || "",
       };
 
       setFormData((prev) => ({ ...prev, ...userFormData }));
@@ -211,6 +213,7 @@ export default function MyAccount() {
         account_number: "bankAccountNumber",
         account_name: "bankAccountName",
         additional: "addionalInfornation", // backend typo kept as-is
+        state: "state",
       };
       
       // Debug: Log the exact field mapping being used
@@ -382,87 +385,90 @@ export default function MyAccount() {
             ))}
 
             {/* Additional Information Section - Left Side */}
-            {/* <div className="sm:col-span-1">
-              <h3 className="text-lg font-bold text-gray-800 mb-4">Additional Information</h3>
+            <div className="sm:col-span-1">
+            
               
-              <div>
+              
+
+              {/* State Field - Added below Additional Information */}
+              <div className="mt-4">
                 <label className="block text-xs uppercase tracking-wide font-medium mb-2 text-gray-600">
-                  Additional Information
+                  State
                 </label>
-                <textarea
-                  name="additional"
-                  value={formData.additional || ""}
+                <input
+                  type="text"
+                  name="state"
+                  value={formData.state || ""}
                   onChange={handleInputChange}
-                  placeholder="degrees, professions, areas of expertise, lawyer etc"
-                  rows="6"
-                  className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+                  placeholder="Enter your state"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-            </div> */}
 
-            {/* Bank Details Section - Right Side */}
-            <div className="sm:col-span-1">
-              <h3 className="text-lg font-bold text-gray-800 mb-4">Bank Details</h3>
-              
-              <div className="space-y-4">
-                {/* Bank Name */}
-                <div>
-                  <label className="block text-xs uppercase tracking-wide font-medium mb-2 text-gray-600">
-                    Bank Name
-                  </label>
-                  <input
-                    type="text"
-                    name="bankName"
-                    value={formData.bankName || ""}
-                    onChange={handleInputChange}
-                    placeholder="Enter Bank Name"
-                    className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
+              {/* Bank Details Section - Below State */}
+              <div className="mt-6">
+                <h3 className="text-lg font-bold text-gray-800 mb-4">Bank Details</h3>
+                
+                <div className="space-y-4">
+                  {/* Bank Name */}
+                  <div>
+                    <label className="block text-xs uppercase tracking-wide font-medium mb-2 text-gray-600">
+                      Bank Name
+                    </label>
+                    <input
+                      type="text"
+                      name="bankName"
+                      value={formData.bankName || ""}
+                      onChange={handleInputChange}
+                      placeholder="Enter Bank Name"
+                      className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
 
-                {/* Branch/BSB */}
-                <div>
-                  <label className="block text-xs uppercase tracking-wide font-medium mb-2 text-gray-600">
-                    Branch/BSB
-                  </label>
-                  <input
-                    type="text"
-                    name="bankBranch"
-                    value={formData.bankBranch || ""}
-                    onChange={handleInputChange}
-                    placeholder="Enter Branch or BSB Code"
-                    className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
+                  {/* Branch/BSB */}
+                  <div>
+                    <label className="block text-xs uppercase tracking-wide font-medium mb-2 text-gray-600">
+                      Branch/BSB
+                    </label>
+                    <input
+                      type="text"
+                      name="bankBranch"
+                      value={formData.bankBranch || ""}
+                      onChange={handleInputChange}
+                      placeholder="Enter Branch or BSB Code"
+                      className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
 
-                {/* Account Number */}
-                <div>
-                  <label className="block text-xs uppercase tracking-wide font-medium mb-2 text-gray-600">
-                    Account Number
-                  </label>
-                  <input
-                    type="text"
-                    name="bankAccountNumber"
-                    value={formData.bankAccountNumber || ""}
-                    onChange={handleInputChange}
-                    placeholder="Enter Account Number"
-                    className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
+                  {/* Account Number */}
+                  <div>
+                    <label className="block text-xs uppercase tracking-wide font-medium mb-2 text-gray-600">
+                      Account Number
+                    </label>
+                    <input
+                      type="text"
+                      name="bankAccountNumber"
+                      value={formData.bankAccountNumber || ""}
+                      onChange={handleInputChange}
+                      placeholder="Enter Account Number"
+                      className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
 
-                {/* Account Name */}
-                <div>
-                  <label className="block text-xs uppercase tracking-wide font-medium mb-2 text-gray-600">
-                    Account Name
-                  </label>
-                  <input
-                    type="text"
-                    name="bankAccountName"
-                    value={formData.bankAccountName || ""}
-                    onChange={handleInputChange}
-                    placeholder="Enter Account Holder Name"
-                    className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
+                  {/* Account Name */}
+                  <div>
+                    <label className="block text-xs uppercase tracking-wide font-medium mb-2 text-gray-600">
+                      Account Name
+                    </label>
+                    <input
+                      type="text"
+                      name="bankAccountName"
+                      value={formData.bankAccountName || ""}
+                      onChange={handleInputChange}
+                      placeholder="Enter Account Holder Name"
+                      className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
