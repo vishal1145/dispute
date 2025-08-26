@@ -155,7 +155,7 @@ export default function Dashboard() {
               </div>
 
               {/* Active Members */}
-              <div className="bg-amber-50 rounded-xl p-6 border border-amber-200 shadow-sm">
+              {/* <div className="bg-amber-50 rounded-xl p-6 border border-amber-200 shadow-sm">
                 <div className="flex items-center gap-2">
                   <CheckCircle className="text-amber-600" />
                 </div>
@@ -165,10 +165,10 @@ export default function Dashboard() {
                 <p className="font-medium text-gray-700 text-sm sm:text-base">
                  Approved  Members
                 </p>
-              </div>
+              </div> */}
 
               {/* Rejected Members */}
-              <div className="bg-violet-50 rounded-xl p-6 border border-violet-200 shadow-sm">
+              {/* <div className="bg-violet-50 rounded-xl p-6 border border-violet-200 shadow-sm">
                 <div className="flex items-center gap-2">
                   <XCircle className="text-violet-600" />
                 </div>
@@ -178,7 +178,7 @@ export default function Dashboard() {
                 <p className="font-medium text-gray-700 text-sm sm:text-base">
                   Rejected Members
                 </p>
-              </div>
+              </div> */}
             </div>
 
             {/* Members Posted jobas*/}

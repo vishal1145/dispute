@@ -54,6 +54,8 @@ export default function Dashboard() {
       console.log('Dashboard Stats API Response:', response);
       setDashboardStats(response.data);
       console.log('Dashboard Stats API Data:', response.data);
+      console.log('Booked Jobs Value:', response.data.bookedJobs);
+      console.log('Full dashboardStats state:', response.data);
     } catch (error) {
       console.error('Dashboard Stats API Error:', error);
       setDashboardError(error.message);
@@ -249,6 +251,21 @@ export default function Dashboard() {
                dashboardStats?.pastMonthJobs?.count || "0"}
             </p>
             <p className="text-sm font-medium text-gray-700">Past Month Jobs</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Booked Jobs */}
+      <div className="bg-amber-50 rounded-xl p-6 border border-amber-200 shadow-sm">
+        <div className="flex flex-col">
+          <div className="text-2xl text-amber-600 mb-3">
+            <Clock className="w-6 h-6" />
+          </div>
+          <div className="flex-1">
+            <p className="text-3xl font-bold text-gray-900 mb-2">
+              {dashboardStats?.bookedJobs || dashboardStats?.dashboard?.bookedJobs || "0"}
+            </p>
+            <p className="text-sm font-medium text-gray-700">Booked Jobs</p>
           </div>
         </div>
       </div>

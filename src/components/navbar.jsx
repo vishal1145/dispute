@@ -188,6 +188,17 @@ export default function Navbar() {
           >
             My Account
           </NavLink>
+
+          <NavLink
+            to="/my-payments"
+            className={({ isActive }) =>
+              isActive
+                ? "text-orange-400 font-bold"
+                : "text-white hover:text-orange-400"
+            }
+          >
+            My Payments
+          </NavLink>
         </div>
 
         {/* Log Out */}

@@ -195,36 +195,79 @@ export default function MemberApprove() {
             />
 
             {/* Search by Field */}
-            <select
-              value={searchField}
-              onChange={(e) => {
-                setSearchField(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 w-full sm:w-auto"
-              disabled={uploading}
-            >
-              <option value="">Expertise</option>
-              <option value="Mediation">Mediation</option>
-              <option value="Arbitration">Arbitration</option>
-              <option value="Conciliation">Conciliation</option>
-              <option value="Negotiation">Negotiation</option>
-              <option value="Facilitation">Facilitation</option>
-              <option value="Legal">Legal</option>
-            </select>
+           <div className="relative w-full sm:w-auto">
+  <select
+    value={searchField}
+    onChange={(e) => {
+      setSearchField(e.target.value);
+      setCurrentPage(1);
+    }}
+    className="peer border border-gray-300 rounded-md px-3 py-2 pr-10 text-sm bg-white
+               focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto
+               appearance-none disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+    disabled={uploading}
+  >
+    <option value="">Expertise</option>
+    <option value="Mediation">Mediation</option>
+    <option value="Arbitration">Arbitration</option>
+    <option value="Conciliation">Conciliation</option>
+    <option value="Negotiation">Negotiation</option>
+    <option value="Facilitation">Facilitation</option>
+    <option value="Legal">Legal</option>
+  </select>
+
+  {/* thick custom dropdown icon */}
+  <svg
+    aria-hidden="true"
+    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5
+               text-gray-600  peer-disabled:text-gray-300"
+    viewBox="0 0 20 20"
+  >
+    <path
+      d="M6 8l4 4 4-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+</div>
+
 
             {/* Search by Location */}
          
+<div className="relative w-full sm:w-auto">
+  <select
+    value={statusFilter}
+    onChange={(e) => setStatusFilter(e.target.value)}
+    className="peer border border-gray-300 rounded-md px-3 py-2 pr-10 text-sm bg-white
+               focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto
+               appearance-none"
+  >
+    <option value="all">All</option>
+    <option value="active">Approved</option>
+    <option value="reject">Rejected</option>
+  </select>
 
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 w-full sm:w-auto"
-            >
-              <option value="all">All</option>
-              <option value="active">Approved</option>
-              <option value="reject">Rejected</option>
-            </select>
+  {/* thick custom dropdown icon */}
+  <svg
+    aria-hidden="true"
+    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5
+               text-gray-600 "
+    viewBox="0 0 20 20"
+  >
+    <path
+      d="M6 8l4 4 4-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="3"   /* thickness */
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+</div>
+
 
             {/* Clear Search Button */}
             {(searchTerm || searchField || searchLocation) && (

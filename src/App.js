@@ -5,6 +5,7 @@ import MyCurrentJobs from "./Pages/myCurrentJobs";
 import MyCompletedJobs from "./Pages/myCompletedJobs";
 import MyAccount from "./Pages/myAccount";
 import Dashboard from "./Pages/dashboard";
+import MemberPayments from "./Pages/memberPayments";
 
 // import Navbar from "./components/navbar";
 import MemberApprove from "./Pages/Admin/memberApprove";
@@ -12,6 +13,7 @@ import CreateJob from "./Pages/Admin/createjob";
 import JobList from "./Pages/Admin/jobList";
 import Account from "./Pages/Admin/account";
 import AdminDashboard from "./Pages/Admin/adminDashboard";
+import Payments from "./Pages/Admin/payments";
 
 export default function App() {
   return (
@@ -25,6 +27,7 @@ export default function App() {
           <Route path="/my-current-jobs" element={<MyCurrentJobs />} />
           <Route path="/my-completed-jobs" element={<MyCompletedJobs />} />
           <Route path="/my-account" element={<MyAccount />} />
+          <Route path="/my-payments" element={<MemberPayments />} />
 
           {/* Admin Routes */}
           <Route path="/admin/member-list" element={<MemberApprove />} />
@@ -32,6 +35,7 @@ export default function App() {
           <Route path="/admin/job-list" element={<JobList />} />
           <Route path="/admin/account" element={<Account />} />
           <Route path="/admin/admin-dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/payments" element={<Payments />} />
         </Routes>
       </Router>
     </div>

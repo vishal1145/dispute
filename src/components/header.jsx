@@ -63,7 +63,7 @@ export default function Header() {
 
       {/* Sidebar */}
       <div
-        className={`fixed md:static top-0 left-0 w-60 min-w-[240px] max-w-[240px] bg-black text-white flex flex-col h-[100vh] py-6 transform transition-transform duration-300 z-50
+        className={`fixed md:sticky md:top-0 left-0 w-60 min-w-[240px] max-w-[240px] bg-black text-white flex flex-col min-h-screen md:h-screen py-6 transform transition-transform duration-300 z-50
           ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
       >
         {/* Logo */}
@@ -126,6 +126,16 @@ export default function Header() {
             }
           >
             Members
+          </NavLink>
+          <NavLink
+            to="/admin/payments"
+            className={({ isActive }) =>
+              isActive
+                ? "text-orange-400 font-bold"
+                : "text-white hover:text-orange-400"
+            }
+          >
+            Payments
           </NavLink>
         </div>
 
