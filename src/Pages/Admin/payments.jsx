@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
 import Header from "../../components/header";
 import axios from "axios";
-import { FileText, X, Plus } from "lucide-react";
-import { Box, CircularProgress, Pagination, Stack } from "@mui/material";
+import Pagination from "@mui/material/Pagination";
+import { FileText, X, Plus, Check } from "lucide-react";
+import { Box, CircularProgress, Stack } from "@mui/material";
 
 export default function Payments() {
   const [loading, setLoading] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showSuccessNotification, setShowSuccessNotification] = useState(false);
+  const [progressWidth, setProgressWidth] = useState(0);
   const [createForm, setCreateForm] = useState({
     memberId: '',
     jobId: '',
@@ -98,7 +101,7 @@ export default function Payments() {
 
     try {
       const paymentData = {
-        memberName: apiUsers.find(user => user.id == createForm.memberId)?.displayName || apiUsers.find(user => user.id == createForm.memberId)?.user_nicename || apiUsers.find(user => user.id == createForm.memberId)?.first_name + ' ' + apiUsers.find(user => user.id == createForm.memberId)?.last_name || apiUsers.find(user => user.id == createForm.memberId)?.username || apiUsers.find(user => user.id == createForm.memberId)?.name || 'Unknown User',
+        memberName: apiUsers.find(user => user.id == createForm.memberId)?.displayName   || 'Unknown User',
         userId: createForm.memberId,
         jobId: createForm.jobId,
         amount: createForm.amount.toString(),
@@ -109,7 +112,6 @@ export default function Payments() {
       };
 
       const response = await axios.post(`${baseUrl}/payments`, paymentData);
-      console.log('Payment created successfully:', response.data);
 
       setShowCreateModal(false);
       setCreateForm({
@@ -121,7 +123,26 @@ export default function Payments() {
       });
       
       await getPayments();
-      alert('Payment created successfully!');
+      
+      // Show success notification with progress animation
+      setShowSuccessNotification(true);
+      setProgressWidth(100);
+      
+      // Start emptying the bar from 100% to 0%, then hide
+      const emptyInterval = setInterval(() => {
+        setProgressWidth(prev => {
+          if (prev <= 0) {
+            clearInterval(emptyInterval);
+            setTimeout(() => {
+              setShowSuccessNotification(false);
+              setProgressWidth(0);
+            }, 300);
+            return 0;
+          }
+          return prev - 3;
+        });
+      }, 50);
+      
     } catch (error) {
       console.error('Error creating payment:', error);
       alert('Failed to create payment. Please try again.');
@@ -178,6 +199,11 @@ export default function Payments() {
     }
   }, [apiUsers.length, apiJobs.length, apiPayments.length]);
 
+  // Reset to first page when payments data changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [apiPayments.length]);
+
   const handleJobChange = (jobId) => {
     const selectedJob = apiJobs.find(job => job.id == jobId);
     setCreateForm(prev => ({
@@ -189,6 +215,41 @@ export default function Payments() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Success Notification */}
+      {showSuccessNotification && (
+        <div className="fixed top-4 right-4 z-50 transform transition-all duration-300 ease-out">
+          <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-4 max-w-sm">
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                  <Check className="w-5 h-5 text-white" />
+                </div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900">
+                  Payment created successfully!
+                </p>
+                <div className="mt-2 w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+                  <div 
+                    className="bg-green-500 h-1.5 rounded-full transition-all duration-100 ease-linear"
+                    style={{ width: `${progressWidth}%` }}
+                  ></div>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setShowSuccessNotification(false);
+                  setProgressWidth(0);
+                }}
+                className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col md:flex-row">
         <Header />
 
@@ -289,7 +350,7 @@ export default function Payments() {
             <div className="flex justify-center md:justify-end mt-5">
               <Stack spacing={2}>
                 <Pagination
-                  count={totalPages}
+                  count={Math.max(totalPages, 1)}
                   page={currentPage}
                   onChange={handlePageChange}
                   variant="outlined"
@@ -342,7 +403,7 @@ export default function Payments() {
                   </option>
                   {apiUsers.length > 0 ? apiUsers.map((user) => (
                     <option key={user.id} value={user.id}>
-                      {user.displayName || user.user_nicename || user.first_name + ' ' + user.last_name || user.username || user.name || 'Unknown User'}
+                      {user.displayName || 'Unknown User'}
                     </option>
                   )) : !usersLoading && (
                     <option value="" disabled>No members available</option>
