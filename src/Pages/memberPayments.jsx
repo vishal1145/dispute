@@ -19,7 +19,7 @@ export default function MemberPayments() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalPayments, setTotalPayments] = useState(0);
-  const [paymentsPerPage] = useState(2);
+  const [paymentsPerPage] = useState(10);
 
   const baseUrl = process.env.REACT_APP_Base_Url;
 

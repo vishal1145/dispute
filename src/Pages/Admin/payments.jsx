@@ -327,10 +327,10 @@ export default function Payments() {
                     </tr>
                   ) : (
                     apiPayments.map((payment) => (
-                      <tr key={payment.id} className="hover:bg-gray-50">
+                      <tr key={payment.id} className="hover:bg-gray-50 border-b border-gray-200 text-sm">
                         <td className="px-6 py-4">
                           <div>
-                            <div className="text-base font-medium text-gray-900 mb-1">
+                            <div className="text-base font-medium  text-gray-900 mb-1">
                               {getPaymentMemberName(payment)}
                             </div>
                             <div className="text-sm text-gray-600">
@@ -340,20 +340,20 @@ export default function Payments() {
                         </td>
                         <td className="px-6 py-4">
                           <div>
-                            <div className="text-base font-medium text-gray-900 mb-1">
+                            <div className="text-base align-top text-gray-700">
                               {payment.jobDescription}
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`inline-flex px-3 py-1 text-sm font-medium rounded-full border ${getCategoryColor(payment.category)}`}>
+                          <span className={`inline-flex px-3 py-1 text-[12px] font-medium rounded-full border ${getCategoryColor(payment.category)}`}>
                             {payment.category}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-gray-900 font-medium">
+                        <td className="px-6 py-4 align-top text-gray-700">
                           {formatDate(payment.transactionDate)}
                         </td>
-                        <td className="px-6 py-4 text-gray-900 font-medium">
+                        <td className="px-6 py-4 align-top text-gray-700">
                           {formatCurrency(payment.amount)}
                         </td>
                       </tr>
