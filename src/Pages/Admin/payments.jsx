@@ -418,12 +418,12 @@ export default function Payments() {
           {/* Header */}
           <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Payments Management</h1>
-              <p className="text-gray-600">Track and manage all payment transactions for dispute resolution jobs.</p>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-600">Payments Management</h1>
+              <p className="text-[16px] font-medium text-gray-700 mt-2">Track and manage all payment transactions for dispute resolution jobs.</p>
             </div>
             <button
               onClick={() => setShowCreateModal(true)}
-              className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
+              className="inline-flex  items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
             >
             <Plus className="w-4 h-4 mr-2" />
               Create Payment
@@ -439,31 +439,31 @@ export default function Payments() {
                 <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 border-b-2 border-gray-300">
-                    <tr>
-                      <th className="px-6 py-4 text-left text-xs uppercase tracking-wide text-gray-600">
+              <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
+                <table className="w-full text-sm border-collapse">
+                  <thead>
+                    <tr className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-600">
+                      <th className="px-4 py-3 border-b border-gray-200">
                         Member
                       </th>
-                      <th className="px-6 py-4 text-left text-xs uppercase tracking-wide text-gray-600">
+                      <th className="px-4 py-3 border-b border-gray-200">
                         Job Details
                       </th>
-                      <th className="px-6 py-4 text-left text-xs uppercase tracking-wide text-gray-600">
+                      <th className="px-4 py-3 border-b border-gray-200">
                         Category
                       </th>
-                      <th className="px-6 py-4 text-left text-xs uppercase tracking-wide text-gray-600">
+                      <th className="px-4 py-3 border-b border-gray-200">
                         Date
                       </th>
-                      <th className="px-6 py-4 text-left text-xs uppercase tracking-wide text-gray-600">
+                      <th className="px-4 py-3 border-b border-gray-200">
                         Amount
                       </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {apiPayments.map((payment) => (
-                      <tr key={payment.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4">
+                      <tr key={payment.id} className="hover:bg-gray-50 border-b border-gray-200 text-sm">
+                        <td className="px-4 py-3 align-top">
                           <div>
                             <div className="text-base font-medium text-gray-900 mb-1">
                               {getPaymentMemberName(payment)}
@@ -473,25 +473,25 @@ export default function Payments() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-4 py-3 align-top">
                           <div>
                             <div className="text-base font-medium text-gray-900 mb-1">
                               {payment.jobDescription}
                             </div>
-                            <div className="text-sm text-gray-600">
+                            {/* <div className="text-sm text-gray-600">
                               Job ID: {payment.jobId}
-                            </div>
+                            </div> */}
                           </div>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-4 py-3 align-top">
                           <span className={`inline-flex px-3 py-1 text-sm font-medium rounded-full border ${getCategoryColor(payment.category)}`}>
                             {payment.category}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-base text-gray-900">
+                        <td className="px-4 py-3 align-top text-gray-900 font-medium">
                           {formatDate(payment.transactionDate)}
                         </td>
-                        <td className="px-6 py-4 text-base font-semibold text-gray-900">
+                        <td className="px-4 py-3 align-top text-gray-900 font-medium">
                           {formatCurrency(payment.amount)}
                         </td>
                       </tr>
@@ -666,7 +666,7 @@ export default function Payments() {
               </div>
 
               {/* Notes */}
-              <div>
+              {/* <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Notes
                 </label>
@@ -678,7 +678,7 @@ export default function Payments() {
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Additional payment notes..."
                 />
-              </div>
+              </div> */}
 
               {/* Form Actions */}
               <div className="flex gap-3 pt-4">
