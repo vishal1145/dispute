@@ -12,42 +12,40 @@ export default function MemberPayments() {
     thisMonthAmount: 0
   });
 
+  const user_id = localStorage.getItem('user_id');
+
   const [apiPayments, setApiPayments] = useState([]);
   const [paymentsLoading, setPaymentsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [paymentsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalPayments, setTotalPayments] = useState(0);
+  const [paymentsPerPage] = useState(2);
 
   const baseUrl = process.env.REACT_APP_Base_Url;
 
-  // Calculate pagination
-  const indexOfLastPayment = currentPage * paymentsPerPage;
-  const indexOfFirstPayment = indexOfLastPayment - paymentsPerPage;
-  const currentPayments = apiPayments.slice(indexOfFirstPayment, indexOfLastPayment);
-  const totalPages = Math.ceil(apiPayments.length / paymentsPerPage);
-
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
+    // Fetch data for the new page
+    getMemberPayments(value);
   };
 
   useEffect(() => {
-    // For now, use sample data
-    
-    // Calculate stats from sample data
+    // Calculate stats from API data
     const totalAmount = apiPayments.reduce((sum, payment) => sum + (parseFloat(payment.amount) || 0), 0);
     const thisMonthPayments = apiPayments.filter(payment => {
-      const paymentDate = new Date(payment.payment_date);
+      const paymentDate = new Date(payment.transactionDate);
       const now = new Date();
       return paymentDate.getMonth() === now.getMonth() && paymentDate.getFullYear() === now.getFullYear();
     });
     const thisMonthAmount = thisMonthPayments.reduce((sum, payment) => sum + (parseFloat(payment.amount) || 0), 0);
     
     setStats({
-      totalPayments: apiPayments.length,
+      totalPayments: totalPayments,
       totalAmount: totalAmount,
       thisMonthPayments: thisMonthPayments.length,
       thisMonthAmount: thisMonthAmount
     });
-  }, [apiPayments]);
+  }, [apiPayments, totalPayments]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -92,12 +90,18 @@ export default function MemberPayments() {
     });
   };
 
-  const getMemberPayments = async () => {
+  const getMemberPayments = async (page = 1) => {
     try {
       setPaymentsLoading(true);
-      const { data } = await axios.get(`${baseUrl}/payments/user/124`);
+      // Include pagination parameters in the API call
+      const { data } = await axios.get(`${baseUrl}/payments/user/${user_id}?page=${page}&per_page=${paymentsPerPage}`);
       console.log('Member Payments API Response:', data);
-      setApiPayments(data?.payments || data || []);
+      
+      // Update state with API response data
+      setApiPayments(data?.payments || []);
+      setTotalPages(data?.total_pages || 1);
+      setTotalPayments(data?.total || 0);
+      setCurrentPage(data?.page || page);
     } catch (err) {
       console.error('Error fetching member payments:', err);
     } finally {
@@ -106,11 +110,9 @@ export default function MemberPayments() {
   };
 
   useEffect(() => {
-    // Only fetch data if not already loaded
-    if (apiPayments.length === 0) {
-      getMemberPayments();
-    }
-  }, [apiPayments.length]);
+    // Fetch initial data
+    getMemberPayments(1);
+  }, []);
 
   // Cleanup function to prevent memory leaks
   useEffect(() => {
@@ -171,7 +173,7 @@ export default function MemberPayments() {
                         </Box>
                       </td>
                     </tr>
-                  ) : currentPayments.length === 0 ? (
+                  ) : apiPayments.length === 0 ? (
                     <tr>
                       <td colSpan="4" className="text-center py-12">
                         <FileText className="mx-auto h-12 w-12 text-gray-400" />
@@ -180,7 +182,7 @@ export default function MemberPayments() {
                       </td>
                     </tr>
                   ) : (
-                    currentPayments.map((payment) => (
+                    apiPayments.map((payment) => (
                       <tr key={payment.id} className="hover:bg-gray-50">
                         <td className="px-4 py-3">
                           <div>
@@ -212,7 +214,7 @@ export default function MemberPayments() {
           </div>
 
           {/* Pagination - Outside Table with Orange Background */}
-          {!paymentsLoading && apiPayments.length > 0 && (
+          {!paymentsLoading && totalPayments > 0 && (
            <div className="flex justify-center md:justify-end mt-5">
                      <Stack spacing={2}>
                        <Pagination

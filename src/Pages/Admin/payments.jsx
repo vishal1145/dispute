@@ -1,15 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Header from "../../components/header";
 import axios from "axios";
-import Pagination from "@mui/material/Pagination";
-import { FileText, X, Plus, Check } from "lucide-react";
-import { Box, CircularProgress, Stack } from "@mui/material";
+import { FileText, X, Plus, ChevronDown, Search } from "lucide-react";
+import { Box, CircularProgress, Pagination, Stack } from "@mui/material";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Payments() {
   const [loading, setLoading] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showSuccessNotification, setShowSuccessNotification] = useState(false);
-  const [progressWidth, setProgressWidth] = useState(0);
   const [createForm, setCreateForm] = useState({
     memberId: '',
     jobId: '',
@@ -27,20 +26,28 @@ export default function Payments() {
   const [apiPayments, setApiPayments] = useState([]);
   const [paymentsLoading, setPaymentsLoading] = useState(false);
 
+  // Custom dropdown states
+  const [memberDropdownOpen, setMemberDropdownOpen] = useState(false);
+  const [jobDropdownOpen, setJobDropdownOpen] = useState(false);
+  const [memberSearchTerm, setMemberSearchTerm] = useState('');
+  const [jobSearchTerm, setJobSearchTerm] = useState('');
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [paymentsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalPayments, setTotalPayments] = useState(0);
 
   const baseUrl = process.env.REACT_APP_Base_Url;
+  
+  // Refs for dropdowns
+  const memberDropdownRef = useRef(null);
+  const jobDropdownRef = useRef(null);
 
-  // Calculate pagination
-  const indexOfLastPayment = currentPage * paymentsPerPage;
-  const indexOfFirstPayment = indexOfLastPayment - paymentsPerPage;
-  const currentPayments = apiPayments.slice(indexOfFirstPayment, indexOfLastPayment);
-  const totalPages = Math.ceil(apiPayments.length / paymentsPerPage);
+  // Server-side pagination - no need for client-side calculations
 
   const handlePageChange = (event, value) => {
-    setCurrentPage(value);
+    getPayments(value);
   };
 
   const getCategoryColor = (category) => {
@@ -83,33 +90,38 @@ export default function Payments() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setCreateForm(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setCreateForm(prev => {
+      const newForm = {
+        ...prev,
+        [name]: value
+      };
+      return newForm;
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!createForm.memberId || !createForm.jobId || !createForm.amount || !createForm.category) {
-      alert('Please fill in all required fields');
+      toast.error('Please fill in all required fields');
       return;
     }
 
     setLoading(true);
 
     try {
+      
       const paymentData = {
-        memberName: apiUsers.find(user => user.id == createForm.memberId)?.displayName   || 'Unknown User',
+        memberName: getSelectedMemberName(),
         userId: createForm.memberId,
         jobId: createForm.jobId,
         amount: createForm.amount.toString(),
         category: createForm.category,
-        jobDescription: apiJobs.find(job => job.id == createForm.jobId)?.briefOverview || 'N/A',
+        jobDescription: getSelectedJobDescription(),
         notes: createForm.notes || '',
         transactionDate: new Date().toISOString().split('T')[0]
       };
+      
 
       const response = await axios.post(`${baseUrl}/payments`, paymentData);
 
@@ -121,31 +133,11 @@ export default function Payments() {
         category: '',
         notes: '',
       });
-      
-      await getPayments();
-      
-      // Show success notification with progress animation
-      setShowSuccessNotification(true);
-      setProgressWidth(100);
-      
-      // Start emptying the bar from 100% to 0%, then hide
-      const emptyInterval = setInterval(() => {
-        setProgressWidth(prev => {
-          if (prev <= 0) {
-            clearInterval(emptyInterval);
-            setTimeout(() => {
-              setShowSuccessNotification(false);
-              setProgressWidth(0);
-            }, 300);
-            return 0;
-          }
-          return prev - 3;
-        });
-      }, 50);
-      
+
+      await getPayments(currentPage);
+      toast.success('Payment created successfully!');
     } catch (error) {
-      console.error('Error creating payment:', error);
-      alert('Failed to create payment. Please try again.');
+      toast.error('Failed to create payment. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -155,33 +147,40 @@ export default function Payments() {
     try {
       setUsersLoading(true);
       const { data } = await axios.get(`${baseUrl}/users`);
-      setApiUsers(data?.users || data || []);
+      setApiUsers(data?.users || []);
     } catch (err) {
       console.error('Error fetching users:', err);
+      setApiUsers([]);
     } finally {
       setUsersLoading(false);
     }
   };
 
-  const getCompletedJobs = async () => {
+  const getCompletedJobs = async (userId) => {
     try {
-      setJobsLoading(true);
-      const { data } = await axios.get(`${baseUrl}/jobs/completed/user/14`);
-      setApiJobs(data?.jobs || data || []);
+      const { data } = await axios.get(`${baseUrl}/jobs/completed/user/${userId}`);
+      setApiJobs(data?.jobs || []);
     } catch (err) {
       console.error('Error fetching completed jobs:', err);
-    } finally {
-      setJobsLoading(false);
+      setApiJobs([]);
     }
   };
 
-  const getPayments = async () => {
+  const getPayments = async (page = 1) => {
     try {
       setPaymentsLoading(true);
-      const { data } = await axios.get(`${baseUrl}/payments`);
-      setApiPayments(data?.payments || data || []);
+      const { data } = await axios.get(`${baseUrl}/payments?page=${page}&per_page=${paymentsPerPage}`);
+      
+      setApiPayments(data?.payments || []);
+      setTotalPages(data?.total_pages || 1);
+      setTotalPayments(data?.total || 0);
+      setCurrentPage(page);
+      
     } catch (err) {
       console.error('Error fetching payments:', err);
+      setApiPayments([]);
+      setTotalPages(1);
+      setTotalPayments(0);
     } finally {
       setPaymentsLoading(false);
     }
@@ -191,65 +190,82 @@ export default function Payments() {
     if (apiUsers.length === 0) {
       getUsers();
     }
-    if (apiJobs.length === 0) {
-      getCompletedJobs();
-    }
+  
     if (apiPayments.length === 0) {
-      getPayments();
+      getPayments(1);
     }
   }, [apiUsers.length, apiJobs.length, apiPayments.length]);
 
-  // Reset to first page when payments data changes
+  // Handle clicks outside dropdowns
   useEffect(() => {
-    setCurrentPage(1);
-  }, [apiPayments.length]);
+    const handleClickOutside = (event) => {
+      if (memberDropdownRef.current && !memberDropdownRef.current.contains(event.target)) {
+        setMemberDropdownOpen(false);
+      }
+      if (jobDropdownRef.current && !jobDropdownRef.current.contains(event.target)) {
+        setJobDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Debug logging
+  useEffect(() => {
+  }, [createForm, apiUsers, apiJobs, apiPayments, totalPages, totalPayments]);
 
   const handleJobChange = (jobId) => {
     const selectedJob = apiJobs.find(job => job.id == jobId);
     setCreateForm(prev => ({
       ...prev,
       jobId: jobId,
-      category: selectedJob?.resolutionField || ''
+      category: selectedJob?.resolutionField || '',
+      amount: selectedJob?.remuneration || ''
     }));
+    setJobDropdownOpen(false);
+    setJobSearchTerm('');
+  };
+
+  const handleMemberSelect = (memberId) => {
+    setCreateForm(prev => ({
+      ...prev,
+      memberId: memberId
+    }));
+    setMemberDropdownOpen(false);
+    setMemberSearchTerm('');
+    if (memberId) {
+      getCompletedJobs(memberId);
+    } else {
+      setApiJobs([]);
+    }
+  };
+
+  const filteredMembers = apiUsers.filter(user => 
+    user.firstName?.toLowerCase().includes(memberSearchTerm.toLowerCase()) ||
+    user.lastName?.toLowerCase().includes(memberSearchTerm.toLowerCase())
+  );
+
+  const filteredJobs = apiJobs.filter(job => 
+    job.briefOverview?.toLowerCase().includes(jobSearchTerm.toLowerCase())
+  );
+
+  const getSelectedMemberName = () => {
+    if (!createForm.memberId) return '';
+    const user = apiUsers.find(u => u.id == createForm.memberId);
+    return user ? `${user.firstName} ${user.lastName}` : '';
+  };
+
+  const getSelectedJobDescription = () => {
+    if (!createForm.jobId) return '';
+    const job = apiJobs.find(j => j.id == createForm.jobId);
+    return job ? job.briefOverview : '';
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Success Notification */}
-      {showSuccessNotification && (
-        <div className="fixed top-4 right-4 z-50 transform transition-all duration-300 ease-out">
-          <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-4 max-w-sm">
-            <div className="flex items-start space-x-3">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                  <Check className="w-5 h-5 text-white" />
-                </div>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900">
-                  Payment created successfully!
-                </p>
-                <div className="mt-2 w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
-                  <div 
-                    className="bg-green-500 h-1.5 rounded-full transition-all duration-100 ease-linear"
-                    style={{ width: `${progressWidth}%` }}
-                  ></div>
-                </div>
-              </div>
-              <button
-                onClick={() => {
-                  setShowSuccessNotification(false);
-                  setProgressWidth(0);
-                }}
-                className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="flex flex-col md:flex-row">
         <Header />
 
@@ -261,7 +277,7 @@ export default function Payments() {
             </div>
             <button
               onClick={() => setShowCreateModal(true)}
-              className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
+              className="inline-flex items-center px-4 py-2 bg-[#f97316] text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
             >
               <Plus className="w-4 h-4 mr-2" />
               Create Payment
@@ -269,6 +285,8 @@ export default function Payments() {
           </div>
 
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            {/* Pagination Info */}
+            
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b-2 border-gray-300">
@@ -299,7 +317,7 @@ export default function Payments() {
                         </Box>
                       </td>
                     </tr>
-                  ) : currentPayments.length === 0 ? (
+                  ) : apiPayments.length === 0 ? (
                     <tr>
                       <td colSpan="5" className="text-center py-12">
                         <FileText className="mx-auto h-12 w-12 text-gray-400" />
@@ -308,7 +326,7 @@ export default function Payments() {
                       </td>
                     </tr>
                   ) : (
-                    currentPayments.map((payment) => (
+                    apiPayments.map((payment) => (
                       <tr key={payment.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4">
                           <div>
@@ -350,7 +368,7 @@ export default function Payments() {
             <div className="flex justify-center md:justify-end mt-5">
               <Stack spacing={2}>
                 <Pagination
-                  count={Math.max(totalPages, 1)}
+                  count={totalPages}
                   page={currentPage}
                   onChange={handlePageChange}
                   variant="outlined"
@@ -392,50 +410,110 @@ export default function Payments() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Select Member *
                 </label>
-                <select
-                  value={createForm.memberId}
-                  onChange={(e) => setCreateForm(prev => ({ ...prev, memberId: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                >
-                  <option value="">
-                    {usersLoading ? 'Loading members...' : 'Choose a member...'}
-                  </option>
-                  {apiUsers.length > 0 ? apiUsers.map((user) => (
-                    <option key={user.id} value={user.id}>
-                      {user.displayName || 'Unknown User'}
-                    </option>
-                  )) : !usersLoading && (
-                    <option value="" disabled>No members available</option>
+                <div className="relative" ref={memberDropdownRef}>
+                  <button
+                    type="button"
+                    onClick={() => setMemberDropdownOpen(!memberDropdownOpen)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-between"
+                  >
+                    <span className={createForm.memberId ? 'text-gray-900' : 'text-gray-500'}>
+                      {getSelectedMemberName() || 'Select a member...'}
+                    </span>
+                    <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${memberDropdownOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  
+                  {memberDropdownOpen && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-hidden">
+                      <div className="p-2 border-b border-gray-200">
+                        <div className="relative">
+                          <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+                          <input
+                            type="text"
+                            placeholder="Search members..."
+                            value={memberSearchTerm}
+                            onChange={(e) => setMemberSearchTerm(e.target.value)}
+                            className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            autoFocus
+                          />
+                        </div>
+                      </div>
+                      <div className="max-h-48 overflow-y-auto">
+                        {filteredMembers.length > 0 ? (
+                          filteredMembers.map((user) => (
+                            <button
+                              key={user.id}
+                              type="button"
+                              onClick={() => handleMemberSelect(user.id)}
+                              className="w-full px-3 py-2 text-left hover:bg-blue-50 focus:bg-blue-50 focus:outline-none text-sm"
+                            >
+                              {user.firstName} {user.lastName}
+                            </button>
+                          ))
+                        ) : (
+                          <div className="px-3 py-2 text-sm text-gray-500">No members found</div>
+                        )}
+                      </div>
+                    </div>
                   )}
-                </select>
+                </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Select Job *
                 </label>
-                <select
-                  name="jobId"
-                  value={createForm.jobId}
-                  onChange={(e) => handleJobChange(e.target.value)}
-                  required
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">
-                    {jobsLoading ? "Loading jobs..." : "Choose a job..."}
-                  </option>
-                  {apiJobs.length > 0
-                    ? apiJobs.map((job) => (
-                        <option key={job.id} value={job.id}>
-                          {job.briefOverview}
-                        </option>
-                      ))
-                    : !jobsLoading && <option value="" disabled>No jobs available</option>}
-                </select>
+                <div className="relative" ref={jobDropdownRef}>
+                  <button
+                    type="button"
+                    onClick={() => !createForm.memberId || jobsLoading ? null : setJobDropdownOpen(!jobDropdownOpen)}
+                    disabled={!createForm.memberId || jobsLoading}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-between disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  >
+                    <span className={createForm.jobId ? 'text-gray-900' : 'text-gray-500'}>
+                      {getSelectedJobDescription() || 
+                        (!createForm.memberId ? 'Please select a member first' : 
+                         jobsLoading ? 'Loading jobs...' : 'Select a job')}
+                    </span>
+                    <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${jobDropdownOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  
+                  {jobDropdownOpen && createForm.memberId && !jobsLoading && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-hidden">
+                      <div className="p-2 border-b border-gray-200">
+                        <div className="relative">
+                          <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+                          <input
+                            type="text"
+                            placeholder="Search jobs..."
+                            value={jobSearchTerm}
+                            onChange={(e) => setJobSearchTerm(e.target.value)}
+                            className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            autoFocus
+                          />
+                        </div>
+                      </div>
+                      <div className="max-h-48 overflow-y-auto">
+                        {filteredJobs.length > 0 ? (
+                          filteredJobs.map((job) => (
+                            <button
+                              key={job.id}
+                              type="button"
+                              onClick={() => handleJobChange(job.id)}
+                              className="w-full px-3 py-2 text-left hover:bg-blue-50 focus:bg-blue-50 focus:outline-none text-sm"
+                            >
+                              {job.briefOverview}
+                            </button>
+                          ))
+                        ) : (
+                          <div className="px-3 py-2 text-sm text-gray-500">No jobs found</div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <div>
+              <div className="hidden">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Category
                 </label>
@@ -480,7 +558,7 @@ export default function Payments() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2  text-white font-medium rounded-lg bg-[#f97316] transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed"
                 >
                   {loading ? 'Creating...' : 'Create Payment'}
                 </button>
@@ -489,6 +567,19 @@ export default function Payments() {
           </div>
         </div>
       )}
+      
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </div>
   );
 }
