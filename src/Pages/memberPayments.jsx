@@ -148,16 +148,16 @@ export default function MemberPayments() {
               <table className="w-full">
                 <thead className="bg-gray-50 border-b-2 border-gray-300">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs uppercase tracking-wide text-gray-600 font-semibold">
+                    <th className="px-4 py-3 text-left text-xs uppercase tracking-wide text-gray-600 font-semibold">
                       Job Details
                     </th>
-                    <th className="px-6 py-4 text-left text-xs uppercase tracking-wide text-gray-600 font-semibold">
+                    <th className="px-4 py-3 text-left text-xs uppercase tracking-wide text-gray-600 font-semibold">
                       Category
                     </th>
-                    <th className="px-6 py-4 text-left text-xs uppercase tracking-wide text-gray-600 font-semibold">
+                    <th className="px-4 py-3 text-left text-xs uppercase tracking-wide text-gray-600 font-semibold">
                       Date
                     </th>
-                    <th className="px-6 py-4 text-left text-xs uppercase tracking-gray-600 font-semibold">
+                    <th className="px-4 py-3 text-left text-xs uppercase tracking-wide text-gray-600 font-semibold">
                       Amount
                     </th>
                   </tr>
@@ -182,7 +182,7 @@ export default function MemberPayments() {
                   ) : (
                     currentPayments.map((payment) => (
                       <tr key={payment.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4">
+                        <td className="px-4 py-3">
                           <div>
                             <div className="text-gray-900 font-medium text-sm">
                               {payment.jobDescription}
@@ -192,15 +192,15 @@ export default function MemberPayments() {
                             </div> */}
                           </div>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-4 py-3">
                           <span className={`inline-flex px-3 py-1 text-sm font-medium rounded-full border ${getCategoryColor(payment.category)}`}>
                             {payment.category}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-900">
+                        <td className="px-4 py-3 text-sm text-gray-900">
                           {formatDate(payment.transactionDate)}
                         </td>
-                        <td className="px-6 py-4 text-sm font-semibold text-gray-900">
+                        <td className="px-4 py-3 text-sm font-semibold text-gray-900">
                           {formatCurrency(payment.amount)}
                         </td>
                       </tr>
@@ -213,7 +213,7 @@ export default function MemberPayments() {
 
           {/* Pagination - Outside Table with Orange Background */}
           {!paymentsLoading && apiPayments.length > 0 && (
-            <div className="flex justify-center md:justify-end mt-5">
+           <div className="flex justify-center md:justify-end mt-5">
                      <Stack spacing={2}>
                        <Pagination
                          count={totalPages}

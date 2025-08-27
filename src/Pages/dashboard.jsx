@@ -170,7 +170,7 @@ export default function Dashboard() {
       <div className="p-6 flex-1 overflow-y-auto bg-gray-50">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Member Dashboard</h1>
+          <h1 className="text-xl sm:text-2xl font-bold mb-1 text-gray-600">Member Dashboard</h1>
           <p className="text-gray-600">Welcome back! Here's your dispute resolution activity overview.</p>
         </div>
 
