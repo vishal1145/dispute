@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Navbar from "../components/navbar";
 import axios from "axios";
 import { FileText } from "lucide-react";
+import { Box, CircularProgress, Pagination, Stack } from "@mui/material";
 
 export default function MemberPayments() {
   const [stats, setStats] = useState({
@@ -13,8 +14,20 @@ export default function MemberPayments() {
 
   const [apiPayments, setApiPayments] = useState([]);
   const [paymentsLoading, setPaymentsLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [paymentsPerPage] = useState(10);
 
   const baseUrl = process.env.REACT_APP_Base_Url;
+
+  // Calculate pagination
+  const indexOfLastPayment = currentPage * paymentsPerPage;
+  const indexOfFirstPayment = indexOfLastPayment - paymentsPerPage;
+  const currentPayments = apiPayments.slice(indexOfFirstPayment, indexOfLastPayment);
+  const totalPages = Math.ceil(apiPayments.length / paymentsPerPage);
+
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value);
+  };
 
   useEffect(() => {
     // For now, use sample data
@@ -117,7 +130,7 @@ export default function MemberPayments() {
           {/* Header */}
           <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">My Payments</h1>
+              <h1 className="text-xl sm:text-2xl font-bold mb-1 text-gray-600">My Payments</h1>
               <p className="text-gray-600">Track and manage your payment transactions for dispute resolution jobs.</p>
             </div>
             <div className="flex gap-3">
@@ -131,44 +144,52 @@ export default function MemberPayments() {
 
           {/* Payments Table */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            
-            {paymentsLoading ? (
-             <div className="flex justify-center items-center h-64">
-               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 border-b-2 border-gray-300">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b-2 border-gray-300">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs uppercase tracking-wide text-gray-600 font-semibold">
+                      Job Details
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs uppercase tracking-wide text-gray-600 font-semibold">
+                      Category
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs uppercase tracking-wide text-gray-600 font-semibold">
+                      Date
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs uppercase tracking-gray-600 font-semibold">
+                      Amount
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {paymentsLoading ? (
                     <tr>
-                      <th className="px-6 py-4 text-left text-xs uppercase tracking-wide text-gray-600">
-                        Job Details
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs uppercase tracking-wide text-gray-600">
-                        Category
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs uppercase tracking-wide text-gray-600">
-                        Date
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs uppercase tracking-wide text-gray-600">
-                        Amount
-                      </th>
-                      {/* <th className="px-6 py-4 text-left text-base font-medium text-gray-800 uppercase tracking-wider">
-                        Status
-                      </th> */}
+                      <td colSpan="4" className="text-center py-20">
+                        <Box sx={{ display: "flex", justifyContent: "center" }}>
+                          <CircularProgress />
+                        </Box>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {apiPayments.map((payment) => (
+                  ) : currentPayments.length === 0 ? (
+                    <tr>
+                      <td colSpan="4" className="text-center py-12">
+                        <FileText className="mx-auto h-12 w-12 text-gray-400" />
+                        <h3 className="mt-2 text-sm font-medium text-gray-900">No payments found</h3>
+                        <p className="mt-1 text-sm text-gray-500">Get started by creating a new payment transaction.</p>
+                      </td>
+                    </tr>
+                  ) : (
+                    currentPayments.map((payment) => (
                       <tr key={payment.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4">
                           <div>
-                            <div className="text-base font-medium text-gray-900 mb-1">
+                            <div className="text-gray-900 font-medium text-sm">
                               {payment.jobDescription}
                             </div>
-                            <div className="text-sm text-gray-600">
-                              Job ID: {payment.jobId}
-                            </div>
+                            {/* <div className="text-sm text-gray-600">
+                              {formatDate(payment.transactionDate)}
+                            </div> */}
                           </div>
                         </td>
                         <td className="px-6 py-4">
@@ -176,32 +197,44 @@ export default function MemberPayments() {
                             {payment.category}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-base text-gray-900">
-                          {formatDate(payment.payment_date)}
+                        <td className="px-6 py-4 text-sm text-gray-900">
+                          {formatDate(payment.transactionDate)}
                         </td>
-                        <td className="px-6 py-4 text-base font-semibold text-gray-900">
+                        <td className="px-6 py-4 text-sm font-semibold text-gray-900">
                           {formatCurrency(payment.amount)}
                         </td>
-                        {/* <td className="px-6 py-4">
-                          <span className={`inline-flex px-3 py-1 text-sm font-medium rounded-full border ${getStatusColor(payment.status)}`}>
-                            {payment.status}
-                          </span>
-                        </td> */}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            {!paymentsLoading && apiPayments.length === 0 && (
-              <div className="text-center py-12">
-                <FileText className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">No payments found</h3>
-                <p className="mt-1 text-sm text-gray-500">Get started by creating a new payment transaction.</p>
-              </div>
-            )}
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
+
+          {/* Pagination - Outside Table with Orange Background */}
+          {!paymentsLoading && apiPayments.length > 0 && (
+            <div className="flex justify-center md:justify-end mt-5">
+                     <Stack spacing={2}>
+                       <Pagination
+                         count={totalPages}
+                         page={currentPage}
+                         onChange={handlePageChange}
+                         variant="outlined"
+                         sx={{
+                           "& .MuiPaginationItem-root.Mui-selected": {
+                             backgroundColor: "#f97316",
+                             color: "white",
+                             borderColor: "orange",
+                           },
+                           "& .MuiPaginationItem-root.Mui-selected:hover": {
+                             backgroundColor: "#ea580c",
+                             borderColor: "#ff8c00",
+                           },
+                         }}
+                       />
+                     </Stack>
+                   </div>
+          )}
         </div>
       </div>
     </div>
