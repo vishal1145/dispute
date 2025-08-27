@@ -558,7 +558,7 @@ export default function Payments() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 px-4 py-2  text-white font-medium rounded-lg bg-[#f97316] transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2  text-white font-medium rounded-lg bg-[#f97316] transition-colors disabled:bg-[#f97316] disabled:cursor-not-allowed"
                 >
                   {loading ? 'Creating...' : 'Create Payment'}
                 </button>
