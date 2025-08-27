@@ -25,28 +25,21 @@ export default function Navbar() {
       console.log('User Data API Response:', data);
       
       // Extract user name from the API response
-      const firstName = data?.userInfo?.firstName || 
-                       data?.dashboard?.userInfo?.firstName || 
-                       data?.user?.firstName || 
-                       "";
-      
-      const lastName = data?.userInfo?.lastName || 
-                      data?.dashboard?.userInfo?.lastName || 
-                      data?.user?.lastName || 
-                      "";
-      
-      const name = firstName && lastName ? `${firstName} ${lastName}` : 
-                   firstName || lastName || "John";
-      
-      setUserName(name);
+     const candidateFirst =
+        data?.userInfo?.firstName ??
+        data?.dashboard?.userInfo?.firstName ??
+        data?.user?.firstName ??
+        "";
+
+      // Ensure only the first token (handles "John Doe" accidentally in firstName)
+      const onlyFirst = String(candidateFirst).trim().split(/\s+/)[0] || "John";
+      setUserName(onlyFirst);
     } catch (error) {
-      console.error('User Data API Error:', error);
-      // Keep default name if API fails
+      console.error("User Data API Error:", error);
     } finally {
       setUserLoading(false);
     }
   };
-
   // Listen for responses from parent window
   React.useEffect(() => {
     const handleMessage = function(event) {
@@ -128,7 +121,7 @@ export default function Navbar() {
           {userLoading ? (
             <p className="text-white text-lg font-medium">Loading...</p>
           ) : (
-            <p className="text-white text-lg font-medium">{userName}</p>
+            <p className="text-white text-lg font-medium">Hello {userName}</p>
           )}
         </div>
 
@@ -177,6 +170,16 @@ export default function Navbar() {
           >
             My Completed Jobs
           </NavLink>
+<NavLink
+            to="/my-payments"
+            className={({ isActive }) =>
+              isActive
+                ? "text-orange-400 font-bold"
+                : "text-white hover:text-orange-400"
+            }
+          >
+            My Payments
+          </NavLink>
 
           <NavLink
             to="/my-account"
@@ -189,16 +192,7 @@ export default function Navbar() {
             My Account
           </NavLink>
 
-          <NavLink
-            to="/my-payments"
-            className={({ isActive }) =>
-              isActive
-                ? "text-orange-400 font-bold"
-                : "text-white hover:text-orange-400"
-            }
-          >
-            My Payments
-          </NavLink>
+          
         </div>
 
         {/* Log Out */}

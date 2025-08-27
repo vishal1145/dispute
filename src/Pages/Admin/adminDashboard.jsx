@@ -214,6 +214,12 @@ export default function Dashboard() {
                       </p>
                       <p>{month.jobsAborted}</p>
                     </div>
+                    <div className="flex gap-2">
+                      <p className="font-medium text-gray-700 text-sm sm:text-base">
+                      Booked Jobs :
+                      </p>
+                      <p>{month.jobsBooked}</p>
+                    </div>
                   </div>
                 </div>
                 <div className=" bg-indigo-50 rounded-xl p-6 border border-indigo-200 shadow-sm">
