@@ -157,7 +157,7 @@ export default function PotentialMember() {
       for (const email of selected) {
         const user = users.find((u) => u.email === email);
         if (user) {
-          await axios.put(`http://localhost:5000/users/api/send-email/${user._id}`);
+          await axios.put(`https://dispute-mail.algofolks.com/users/api/send-email/${user._id}`);
         }
       }
       toast.success("Emails sent successfully!");
