@@ -1,0 +1,460 @@
+import React, { useEffect, useState, useRef } from "react";
+import Header from "../../components/header";
+import { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
+import axios from "axios";
+import Pagination from "@mui/material/Pagination";
+import {
+  Modal,
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Stack,
+} from "@mui/material";
+
+const USERS_PER_PAGE = 10;
+
+export default function PotentialMember() {
+  const baseUrl = "http://localhost:5000/users/api";
+  const [users, setUsers] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [openUpdate, setOpenUpdate] = useState(false);
+  const [excelFile, setExcelFile] = useState(null);
+  const fileInputRef = useRef(null);
+  const [search, setSearch] = useState("");
+  const [fieldFilter, setFieldFilter] = useState("");
+  const [selected, setSelected] = useState([]);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [formData, setFormData] = useState({
+    subject: "",
+    body: "",
+  });
+
+  const [open, setOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editRow, setEditRow] = useState(null);
+
+  const fieldOptions = [...new Set(users.map((row) => row.field))];
+
+  const memberData = async () => {
+    try {
+      setLoading(true);
+      const apiResponse = await axios.get(baseUrl);
+      const response = apiResponse.data;
+      setUsers(response.data || []);
+      console.log("Fetched members:", response.data);
+    } catch (error) {
+      console.error("Error fetching members:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    memberData();
+  }, []);
+
+  const updateUser = async () => {
+    try {
+      await axios.put(`${baseUrl}/edit/${selectedUserId}`, formData);
+      toast.success("User updated successfully!");
+      memberData();
+      setFormData({
+        subject: "",
+        body: "",
+      });
+    } catch (error) {
+      console.error("Error updating user:", error);
+      toast.error("Failed to update user");
+    } finally {
+      setOpenUpdate(false);
+    }
+  };
+
+  const handleEditMessage = (u) => {
+    setOpenUpdate(true);
+    setSelectedUserId(u._id);
+    setFormData({
+      subject: u.message?.subject || "",
+      body: u.message?.body || "",
+    });
+  };
+
+  const handleExcelUploadClick = () => fileInputRef.current?.click();
+
+  const handleFileChange = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setExcelFile(file);
+    uploadExcel(file);
+  };
+
+  const uploadExcel = async (file) => {
+    const formData = new FormData();
+    formData.append("excel_file", file);
+    try {
+      setUploading(true);
+      await axios.post(`${baseUrl}/excel-upload`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      await memberData();
+    } catch (error) {
+      console.error("Upload failed:", error);
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      setExcelFile(null);
+    }
+  };
+
+  const filteredData = users.filter((row) => {
+    const name = row.name?.toLowerCase() || "";
+    const state = row.state?.toLowerCase() || "";
+    const field = row.field?.toLowerCase() || "";
+    const query = search.toLowerCase();
+
+    const matchesSearch =
+      name.includes(query) || state.includes(query) || field.includes(query);
+
+    const matchesField = fieldFilter
+      ? row.field.toLowerCase() === fieldFilter.toLowerCase()
+      : true;
+
+    return matchesSearch && matchesField;
+  });
+
+  const totalPages = Math.ceil(filteredData.length / USERS_PER_PAGE);
+  const displayedUsers = filteredData.slice(
+    (currentPage - 1) * USERS_PER_PAGE,
+    currentPage * USERS_PER_PAGE
+  );
+
+  const handlePageChange = (_event, value) => {
+    setCurrentPage(value);
+  };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, fieldFilter]);
+
+  const toggleSelect = (email) => {
+    setSelected((prev) =>
+      prev.includes(email) ? prev.filter((e) => e !== email) : [...prev, email]
+    );
+  };
+
+  const handleSendSelected = async () => {
+    if (selected.length === 0) {
+      alert("Please select at least one member.");
+      return;
+    }
+    try {
+      setSending(true);
+      for (const email of selected) {
+        const user = users.find((u) => u.email === email);
+        if (user) {
+          await axios.put(`http://localhost:5000/users/api/send-email/${user._id}`);
+        }
+      }
+      toast.success("Emails sent successfully!");
+      await memberData();
+      setSelected([]);
+    } catch (error) {
+      console.error("Error sending emails:", error);
+      toast.error("Failed to send emails.");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleEdit = (member) => {
+    setEditRow({ ...member });
+    setIsEditing(true);
+  };
+
+  const handleSaveEdit = () => {
+    setUsers((prev) =>
+      prev.map((row) => (row.email === editRow.email ? editRow : row))
+    );
+    setIsEditing(false);
+    setEditRow(null);
+  };
+
+  const handleClose = () => setOpenUpdate(false);
+
+  return (
+    <div className="flex flex-col lg:flex-row md:flex-row min-h-screen bg-gray-50">
+      <Header />
+      <div className="p-4 sm:p-6 flex-1 overflow-x-hidden">
+        <Toaster position="top-right" />
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-5">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-600">
+              Potential Member
+            </h1>
+            <p className="text-gray-600 mt-2 text-sm sm:text-base">
+              Contribute your expertise to a recognized panel of dispute
+              resolution specialists
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-3 items-center">
+            <input
+              type="text"
+              placeholder="Search by Name or State..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="flex-1 min-w-[200px] sm:w-[250px] p-2 border focus:outline-none focus:ring-2 focus:ring-orange-500 rounded-md"
+            />
+
+            <div className="relative w-full sm:w-auto">
+              <select
+                value={fieldFilter}
+                onChange={(e) => setFieldFilter(e.target.value)}
+                className="peer border border-gray-300 rounded-md px-3 py-2 text-[16px] font-semibold text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500 w-full sm:w-auto appearance-none"
+              >
+                <option value="">All Field</option>
+                {fieldOptions.map((opt, i) => (
+                  <option key={i} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+              <svg
+                aria-hidden="true"
+                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-600"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  d="M6 8l4 4 4-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+
+            <div>
+              <input
+                type="file"
+                accept=".xlsx,.xls"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                style={{ display: "none" }}
+              />
+              {excelFile && (
+                <span className="ml-3 text-sm text-gray-700">
+                  {excelFile.name}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={handleExcelUploadClick}
+                className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 disabled:opacity-60"
+                disabled={uploading}
+              >
+                {uploading ? "Uploading..." : "Upload Excel"}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {selected.length > 0 && (
+          <div className="mb-4">
+            <button
+              onClick={handleSendSelected}
+              className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 disabled:opacity-50"
+              disabled={sending}
+            >
+              {sending ? "Sending..." : `Send Email (${selected.length})`}
+            </button>
+          </div>
+        )}
+
+        <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
+          <table className="w-full text-sm border-collapse min-w-[850px]">
+            <thead>
+              <tr className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-600">
+                <th className="px-4 py-3 border-b border-gray-200">
+                  <input
+                    type="checkbox"
+                    checked={
+                      selected.length > 0 &&
+                      filteredData.every((m) => selected.includes(m.email))
+                    }
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelected(filteredData.map((m) => m.email));
+                      } else {
+                        setSelected([]);
+                      }
+                    }}
+                  />
+                </th>
+                <th className="px-4 py-3 border-b border-gray-200">Name</th>
+                <th className="px-4 py-3 border-b border-gray-200">Email</th>
+                <th className="px-4 py-3 border-b border-gray-200">State</th>
+                <th className="px-4 py-3 border-b border-gray-200">Number</th>
+                <th className="px-4 py-3 border-b border-gray-200">Field</th>
+                <th className="px-4 py-3 border-b border-gray-200">
+                  Licensed By
+                </th>
+                <th className="px-4 py-3 border-b border-gray-200">
+                  License Number
+                </th>
+                <th className="px-4 py-3 border-b border-gray-200">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="8" className="text-center py-4">
+                    <div className="flex justify-center items-center">
+                      <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
+                      <span className="ml-2 text-blue-500">
+                        Loading data...
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              ) : displayedUsers.length > 0 ? (
+                displayedUsers.map((user, index) => (
+                  <tr
+                    key={index}
+                    className="hover:bg-gray-50 border-b border-gray-200 text-sm"
+                  >
+                    <td className="px-4 py-3">
+                      <input
+                        type="checkbox"
+                        checked={selected.includes(user.email)}
+                        onChange={() => toggleSelect(user.email)}
+                      />
+                    </td>
+                    <td className="px-4 py-3 text-gray-700">{user.name}</td>
+                    <td className="px-4 py-3 text-gray-700">{user.email}</td>
+                    <td className="px-4 py-3 text-gray-700">{user.state}</td>
+                    <td className="px-4 py-3 text-gray-700">{user.number}</td>
+                    <td className="px-4 py-3 text-gray-700">
+                      <p className="inline-flex items-center bg-blue-100 text-blue-700 text-[10px] px-3 py-1 rounded-full font-medium">
+                        {user.field}
+                      </p>
+                    </td>
+                    <td className="px-4 py-3 text-gray-700">
+                      {user.licensedBy}
+                    </td>
+                    <td className="px-4 py-3 text-gray-700">
+                      {user.licenseNumber}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex gap-3 items-center">
+                        {user.email_sent ? (
+                          <span className="bg-green-100 text-green-700 text-sm font-medium px-3 py-1 rounded-full">
+                            Sent
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => handleEditMessage(user)}
+                            className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-3 py-1 rounded-lg transition-colors"
+                          >
+                            Edit
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="8" className="text-center py-4 text-gray-500">
+                    No data available
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {totalPages > 1 && (
+          <div className="flex justify-center sm:justify-end mt-5">
+            <Stack spacing={2}>
+              <Pagination
+                count={totalPages}
+                page={currentPage}
+                onChange={handlePageChange}
+                variant="outlined"
+                color="primary"
+                sx={{
+                  "& .MuiPaginationItem-root.Mui-selected": {
+                    backgroundColor: "#f97316",
+                    color: "white",
+                    borderColor: "orange",
+                  },
+                  "& .MuiPaginationItem-root.Mui-selected:hover": {
+                    backgroundColor: "#ea580c",
+                    borderColor: "#ff8c00",
+                  },
+                }}
+              />
+            </Stack>
+          </div>
+        )}
+
+        {openUpdate && (
+          <Modal open={openUpdate} onClose={handleClose}>
+            <Box
+              sx={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: { xs: "90%", sm: 400 },
+                bgcolor: "background.paper",
+                borderRadius: 2,
+                boxShadow: 24,
+                p: 4,
+              }}
+            >
+              <Typography variant="h6" mb={2}>
+                Edit Message
+              </Typography>
+              <TextField
+                fullWidth
+                label="Subject"
+                value={formData.subject}
+                onChange={(e) =>
+                  setFormData({ ...formData, subject: e.target.value })
+                }
+                margin="normal"
+              />
+              <TextField
+                fullWidth
+                label="Body"
+                value={formData.body}
+                onChange={(e) =>
+                  setFormData({ ...formData, body: e.target.value })
+                }
+                margin="normal"
+                multiline
+                rows={4}
+              />
+              <Box mt={2} display="flex" justifyContent="flex-end" gap={1}>
+                <Button variant="outlined" onClick={handleClose}>
+                  Cancel
+                </Button>
+                <Button variant="contained" onClick={updateUser}>
+                  Save
+                </Button>
+              </Box>
+            </Box>
+          </Modal>
+        )}
+      </div>
+    </div>
+  );
+}

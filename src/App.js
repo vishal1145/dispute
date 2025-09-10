@@ -14,6 +14,7 @@ import JobList from "./Pages/Admin/jobList";
 import Account from "./Pages/Admin/account";
 import AdminDashboard from "./Pages/Admin/adminDashboard";
 import Payments from "./Pages/Admin/payments";
+import PotentialMember from "./Pages/Admin/potentialMember";
 
 export default function App() {
   return (
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="/admin/account" element={<Account />} />
           <Route path="/admin/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/admin/payments" element={<Payments />} />
+          <Route path="/admin/potential-member" element={<PotentialMember />} />
         </Routes>
       </Router>
     </div>

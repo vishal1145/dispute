@@ -1,0 +1,74 @@
+[
+  {
+    "name": "Rahul Sharma",
+    "email": "rahul.sharma@example.com",
+    "state": "Maharashtra",
+    "number": "+91-9876543210",
+    "field": "Mediation",
+    "licensedBy": "Bar Council of India",
+    "licenseNumber": "IN-MED-2021-045"
+  },
+  {
+    "name": "Priya Mehta",
+    "email": "priya.mehta@example.com",
+    "state": "Delhi",
+    "number": "+91-9988776655",
+    "field": "Conciliation",
+    "licensedBy": "Delhi State Bar Council",
+    "licenseNumber": "DL-CON-2020-123"
+  },
+  {
+    "name": "Amit Verma",
+    "email": "amit.verma@example.com",
+    "state": "Karnataka",
+    "number": "+91-9123456789",
+    "field": "Arbitration",
+    "licensedBy": "Karnataka Bar Council",
+    "licenseNumber": "KA-ARB-2019-789"
+  },
+  {
+    "name": "Sneha Gupta",
+    "email": "sneha.gupta@example.com",
+    "state": "Uttar Pradesh",
+    "number": "+91-9765432109",
+    "field": "Negotiation",
+    "licensedBy": "UP Bar Council",
+    "licenseNumber": "UP-NEG-2022-321"
+  },
+  {
+    "name": "Vikram Singh",
+    "email": "vikram.singh@example.com",
+    "state": "Rajasthan",
+    "number": "+91-9823456780",
+    "field": "Facilitation",
+    "licensedBy": "Rajasthan Bar Council",
+    "licenseNumber": "RJ-FAC-2018-456"
+  },
+  {
+    "name": "Ananya Iyer",
+    "email": "ananya.iyer@example.com",
+    "state": "Tamil Nadu",
+    "number": "+91-9345678910",
+    "field": "Litigation",
+    "licensedBy": "Tamil Nadu Bar Council",
+    "licenseNumber": "TN-LIT-2017-654"
+  },
+  {
+    "name": "Karan Patel",
+    "email": "karan.patel@example.com",
+    "state": "Gujarat",
+    "number": "+91-9456781234",
+    "field": "Arbitration",
+    "licensedBy": "Gujarat Bar Council",
+    "licenseNumber": "GJ-ARB-2021-778"
+  },
+  {
+    "name": "Neha Reddy",
+    "email": "neha.reddy@example.com",
+    "state": "Telangana",
+    "number": "+91-9871203456",
+    "field": "Mediation",
+    "licensedBy": "Telangana Bar Council",
+    "licenseNumber": "TS-MED-2020-990"
+  }
+]

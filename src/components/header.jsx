@@ -70,10 +70,10 @@ export default function Header() {
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
           <img
-  src="/images/logo.webp"
-  alt="Dispute Resolutions"
-  className="w-[200px] h-[200px] object-contain mb-3 mr-5"
-/>
+            src="/images/logo.webp"
+            alt="Dispute Resolutions"
+            className="w-[200px] h-[200px] object-contain mb-3 mr-5"
+          />
         </div>
 
         {/* Hello Message */}
@@ -136,6 +136,17 @@ export default function Header() {
             }
           >
             Payments
+          </NavLink>
+
+          <NavLink
+            to="/admin/potential-member"
+            className={({ isActive }) =>
+              isActive
+                ? "text-orange-400 font-bold"
+                : "text-white hover:text-orange-400"
+            }
+          >
+            Potential Member
           </NavLink>
         </div>
 

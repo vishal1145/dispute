@@ -42,20 +42,25 @@ export default function MemberApprove() {
       setLoading(true);
       const { data } = await axios.get(`${baseUrl}/users`);
       setUsers(data.users || []);
-      
+
       // Debug: Log expertise fields to see what data we have
       if (data.users && data.users.length > 0) {
-        const expertiseFields = [...new Set(data.users.map(user => user.expertise).filter(Boolean))];
+        const expertiseFields = [
+          ...new Set(data.users.map((user) => user.expertise).filter(Boolean)),
+        ];
         console.log("Available expertise fields:", expertiseFields);
         console.log("Total users loaded:", data.users.length);
-        
+
         // Log first few users to see their expertise values
-        console.log("Sample users expertise:", data.users.slice(0, 5).map(u => ({
-          id: u.id,
-          name: `${u.firstName} ${u.lastName}`,
-          expertise: u.expertise,
-          status: u.status
-        })));
+        console.log(
+          "Sample users expertise:",
+          data.users.slice(0, 5).map((u) => ({
+            id: u.id,
+            name: `${u.firstName} ${u.lastName}`,
+            expertise: u.expertise,
+            status: u.status,
+          }))
+        );
       }
     } catch (err) {
       console.error("Error fetching users:", err);
@@ -123,26 +128,35 @@ export default function MemberApprove() {
     }
 
     // alphabetical search filter
-    const matchesSearch = !searchTerm || 
-      `${job.firstName || ""} ${job.lastName || ""}`.toLowerCase().includes(search) ||
+    const matchesSearch =
+      !searchTerm ||
+      `${job.firstName || ""} ${job.lastName || ""}`
+        .toLowerCase()
+        .includes(search) ||
       job.title?.toLowerCase().includes(search) ||
       job.address?.toLowerCase().includes(search) ||
       job.resolution?.toLowerCase().includes(search) ||
       job.numberOfJobs?.toString().includes(search) ||
-      job.expertise?.toLowerCase().includes(search) || 
+      job.expertise?.toLowerCase().includes(search) ||
       job.jobStatistics?.completedJobs?.toString().includes(search);
 
     // field filter
-    const matchesField = !searchField || searchField === "" || 
-      (job.expertise && job.expertise.toLowerCase().includes(searchField.toLowerCase()));
+    const matchesField =
+      !searchField ||
+      searchField === "" ||
+      (job.expertise &&
+        job.expertise.toLowerCase().includes(searchField.toLowerCase()));
 
     // location filter
-    const matchesLocation = !searchLocation || 
+    const matchesLocation =
+      !searchLocation ||
       (job.address || "").toLowerCase().includes(searchLocation.toLowerCase());
 
     // Debug logging for field filter
     if (searchField && searchField !== "") {
-      console.log(`Field filter debug: searchField="${searchField}", job.expertise="${job.expertise}", matchesField=${matchesField}`);
+      console.log(
+        `Field filter debug: searchField="${searchField}", job.expertise="${job.expertise}", matchesField=${matchesField}`
+      );
     }
 
     return matchesSearch && matchesField && matchesLocation;
@@ -178,7 +192,6 @@ export default function MemberApprove() {
             <h2 className="text-xl sm:text-2xl font-bold text-gray-600">
               Total Members: {users?.length || 0}
             </h2>
-            
           </div>
           <div className="flex flex-wrap gap-2">
             {/* Search by Alphabetical */}
@@ -195,79 +208,77 @@ export default function MemberApprove() {
             />
 
             {/* Search by Field */}
-           <div className="relative w-full sm:w-auto">
-  <select
-    value={searchField}
-    onChange={(e) => {
-      setSearchField(e.target.value);
-      setCurrentPage(1);
-    }}
-    className="peer border border-gray-300 rounded-md px-3 py-2 pr-10 text-sm bg-white
+            <div className="relative w-full sm:w-auto">
+              <select
+                value={searchField}
+                onChange={(e) => {
+                  setSearchField(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="peer border border-gray-300 rounded-md px-3 py-2 pr-10 text-sm bg-white
                focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto
                appearance-none disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-    disabled={uploading}
-  >
-    <option value="">Expertise</option>
-    <option value="Mediation">Mediation</option>
-    <option value="Arbitration">Arbitration</option>
-    <option value="Conciliation">Conciliation</option>
-    <option value="Negotiation">Negotiation</option>
-    <option value="Facilitation">Facilitation</option>
-    <option value="Legal">Legal</option>
-  </select>
+                disabled={uploading}
+              >
+                <option value="">Expertise</option>
+                <option value="Mediation">Mediation</option>
+                <option value="Arbitration">Arbitration</option>
+                <option value="Conciliation">Conciliation</option>
+                <option value="Negotiation">Negotiation</option>
+                <option value="Facilitation">Facilitation</option>
+                <option value="Legal">Legal</option>
+              </select>
 
-  {/* thick custom dropdown icon */}
-  <svg
-    aria-hidden="true"
-    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5
+              {/* thick custom dropdown icon */}
+              <svg
+                aria-hidden="true"
+                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5
                text-gray-600  peer-disabled:text-gray-300"
-    viewBox="0 0 20 20"
-  >
-    <path
-      d="M6 8l4 4 4-4"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="3"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-</div>
-
+                viewBox="0 0 20 20"
+              >
+                <path
+                  d="M6 8l4 4 4-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
 
             {/* Search by Location */}
-         
-<div className="relative w-full sm:w-auto">
-  <select
-    value={statusFilter}
-    onChange={(e) => setStatusFilter(e.target.value)}
-    className="peer border border-gray-300 rounded-md px-3 py-2 pr-10 text-sm bg-white
+
+            <div className="relative w-full sm:w-auto">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="peer border border-gray-300 rounded-md px-3 py-2 pr-10 text-sm bg-white
                focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto
                appearance-none"
-  >
-    <option value="all">All</option>
-    <option value="active">Approved</option>
-    <option value="reject">Rejected</option>
-  </select>
+              >
+                <option value="all">All</option>
+                <option value="active">Approved</option>
+                <option value="reject">Rejected</option>
+              </select>
 
-  {/* thick custom dropdown icon */}
-  <svg
-    aria-hidden="true"
-    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5
+              {/* thick custom dropdown icon */}
+              <svg
+                aria-hidden="true"
+                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5
                text-gray-600 "
-    viewBox="0 0 20 20"
-  >
-    <path
-      d="M6 8l4 4 4-4"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="3"   /* thickness */
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-</div>
-
+                viewBox="0 0 20 20"
+              >
+                <path
+                  d="M6 8l4 4 4-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3" /* thickness */
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
 
             {/* Clear Search Button */}
             {(searchTerm || searchField || searchLocation) && (
@@ -283,9 +294,8 @@ export default function MemberApprove() {
                 Clear Search
               </button>
             )}
-            
+
             {/* Debug Button */}
-           
           </div>
         </div>
 
@@ -382,7 +392,9 @@ export default function MemberApprove() {
                       </td>
 
                       <td className="px-4 py-3 align-top text-gray-700">
-                        {job.state || job.address?.split(',').pop()?.trim() || "-"}
+                        {job.state ||
+                          job.address?.split(",").pop()?.trim() ||
+                          "-"}
                       </td>
 
                       <td className="px-4 py-3 align-top">
@@ -424,7 +436,11 @@ export default function MemberApprove() {
                                   : "bg-gray-500"
                               }`}
                             ></span>
-                            {job.status === "active" ? "Approved" : job.status === "reject" ? "Rejected" : toTitle(job.status)}
+                            {job.status === "active"
+                              ? "Approved"
+                              : job.status === "reject"
+                              ? "Rejected"
+                              : toTitle(job.status)}
                           </span>
                         )}
                       </td>
