@@ -16,7 +16,7 @@ import {
 const USERS_PER_PAGE = 10;
 
 export default function PotentialMember() {
-  const baseUrl = "http://localhost:5000/users/api";
+  const baseUrl = "https://dispute-mail.algofolks.com/users/api";
   const [users, setUsers] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [sending, setSending] = useState(false);
@@ -61,15 +61,15 @@ export default function PotentialMember() {
   const updateUser = async () => {
     try {
       await axios.put(`${baseUrl}/edit/${selectedUserId}`, formData);
-      toast.success("User updated successfully!");
+      toast.success("Message updated successfully!");
       memberData();
       setFormData({
         subject: "",
         body: "",
       });
     } catch (error) {
-      console.error("Error updating user:", error);
-      toast.error("Failed to update user");
+      console.error("Error updating message:", error);
+      toast.error("Failed to update message");
     } finally {
       setOpenUpdate(false);
     }
@@ -372,7 +372,7 @@ export default function PotentialMember() {
               ) : (
                 <tr>
                   <td colSpan="8" className="text-center py-4 text-gray-500">
-                    No data available
+                   No record found
                   </td>
                 </tr>
               )}
