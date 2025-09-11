@@ -17,6 +17,7 @@ const USERS_PER_PAGE = 10;
 
 export default function PotentialMember() {
   const baseUrl = "https://dispute-mail.algofolks.com/users/api";
+  // const baseUrl = "http://localhost:5000/users/api";
   const [users, setUsers] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [sending, setSending] = useState(false);
@@ -29,6 +30,7 @@ export default function PotentialMember() {
   const [fieldFilter, setFieldFilter] = useState("");
   const [selected, setSelected] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState(null);
+  // const SAMPLE_URL = `${process.env.PUBLIC_URL}/potential_member.xlsx`;
   const [formData, setFormData] = useState({
     subject: "",
     body: "",
@@ -46,7 +48,6 @@ export default function PotentialMember() {
       const apiResponse = await axios.get(baseUrl);
       const response = apiResponse.data;
       setUsers(response.data || []);
-      console.log("Fetched members:", response.data);
     } catch (error) {
       console.error("Error fetching members:", error);
     } finally {
@@ -63,10 +64,7 @@ export default function PotentialMember() {
       await axios.put(`${baseUrl}/edit/${selectedUserId}`, formData);
       toast.success("Message updated successfully!");
       memberData();
-      setFormData({
-        subject: "",
-        body: "",
-      });
+      setFormData({ subject: "", body: "" });
     } catch (error) {
       console.error("Error updating message:", error);
       toast.error("Failed to update message");
@@ -141,10 +139,22 @@ export default function PotentialMember() {
     setCurrentPage(1);
   }, [search, fieldFilter]);
 
+  // Toggle individual checkbox
   const toggleSelect = (email) => {
     setSelected((prev) =>
       prev.includes(email) ? prev.filter((e) => e !== email) : [...prev, email]
     );
+  };
+
+  // Toggle select all on current page
+  const toggleSelectAll = (isChecked) => {
+    const emailsOnPage = displayedUsers.map((m) => m.email);
+    if (isChecked) {
+      const newSelected = Array.from(new Set([...selected, ...emailsOnPage]));
+      setSelected(newSelected);
+    } else {
+      setSelected(selected.filter((e) => !emailsOnPage.includes(e)));
+    }
   };
 
   const handleSendSelected = async () => {
@@ -152,15 +162,28 @@ export default function PotentialMember() {
       alert("Please select at least one member.");
       return;
     }
+
     try {
       setSending(true);
-      for (const email of selected) {
-        const user = users.find((u) => u.email === email);
-        if (user) {
-          await axios.put(`https://dispute-mail.algofolks.com/users/api/send-email/${user._id}`);
-        }
+
+      // Only selected members
+      const selectedMembers = users.filter((u) => selected.includes(u.email));
+
+      // Send in bulk
+      const response = await axios.put(`${baseUrl}/send-email`, {
+        data: selectedMembers,
+      });
+
+      const result = response.data;
+
+      if (result.results) {
+        const successCount = result.results.filter((r) => r.status === "success").length;
+        const failCount = result.results.filter((r) => r.status === "failed").length;
+        toast.success(`Emails sent: ${successCount}, Failed: ${failCount}`);
+      } else {
+        toast.success("Emails sent successfully!");
       }
-      toast.success("Emails sent successfully!");
+
       await memberData();
       setSelected([]);
     } catch (error) {
@@ -169,19 +192,6 @@ export default function PotentialMember() {
     } finally {
       setSending(false);
     }
-  };
-
-  const handleEdit = (member) => {
-    setEditRow({ ...member });
-    setIsEditing(true);
-  };
-
-  const handleSaveEdit = () => {
-    setUsers((prev) =>
-      prev.map((row) => (row.email === editRow.email ? editRow : row))
-    );
-    setIsEditing(false);
-    setEditRow(null);
   };
 
   const handleClose = () => setOpenUpdate(false);
@@ -196,13 +206,23 @@ export default function PotentialMember() {
             <h1 className="text-xl sm:text-2xl font-bold text-gray-600">
               Potential Member
             </h1>
-            <p className="text-gray-600 mt-2 text-sm sm:text-base">
-              Contribute your expertise to a recognized panel of dispute
-              resolution specialists
-            </p>
           </div>
 
           <div className="flex flex-wrap gap-3 items-center">
+
+            {/* <a
+              href={SAMPLE_URL}
+              download="potential_member.xlsx"
+              className="text-gray-600 underline hover:text-gray-800 transition-colors"
+              style={{
+                textDecoration: "underline",
+                color: "gray",
+                border: "none",
+              }}
+            >
+              Download Sample File
+            </a> */}
+
             <input
               type="text"
               placeholder="Search by Name or State..."
@@ -285,16 +305,10 @@ export default function PotentialMember() {
                   <input
                     type="checkbox"
                     checked={
-                      selected.length > 0 &&
-                      filteredData.every((m) => selected.includes(m.email))
+                      displayedUsers.length > 0 &&
+                      displayedUsers.every((m) => selected.includes(m.email))
                     }
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelected(filteredData.map((m) => m.email));
-                      } else {
-                        setSelected([]);
-                      }
-                    }}
+                    onChange={(e) => toggleSelectAll(e.target.checked)}
                   />
                 </th>
                 <th className="px-4 py-3 border-b border-gray-200">Name</th>
@@ -345,34 +359,28 @@ export default function PotentialMember() {
                         {user.field}
                       </p>
                     </td>
-                    <td className="px-4 py-3 text-gray-700">
-                      {user.licensedBy}
-                    </td>
-                    <td className="px-4 py-3 text-gray-700">
-                      {user.licenseNumber}
-                    </td>
+                    <td className="px-4 py-3 text-gray-700">{user.licensedBy}</td>
+                    <td className="px-4 py-3 text-gray-700">{user.licenseNumber}</td>
                     <td className="px-4 py-3">
-                      <div className="flex gap-3 items-center">
-                        {user.email_sent ? (
-                          <span className="bg-green-100 text-green-700 text-sm font-medium px-3 py-1 rounded-full">
-                            Sent
-                          </span>
-                        ) : (
-                          <button
-                            onClick={() => handleEditMessage(user)}
-                            className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-3 py-1 rounded-lg transition-colors"
-                          >
-                            Edit
-                          </button>
-                        )}
-                      </div>
+                      {user.email_sent ? (
+                        <span className="bg-green-100 text-green-700 text-sm font-medium px-3 py-1 rounded-full">
+                          Sent
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => handleEditMessage(user)}
+                          className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-3 py-1 rounded-lg transition-colors"
+                        >
+                          Edit
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
                   <td colSpan="8" className="text-center py-4 text-gray-500">
-                   No record found
+                    No record found
                   </td>
                 </tr>
               )}
@@ -389,17 +397,6 @@ export default function PotentialMember() {
                 onChange={handlePageChange}
                 variant="outlined"
                 color="primary"
-                sx={{
-                  "& .MuiPaginationItem-root.Mui-selected": {
-                    backgroundColor: "#f97316",
-                    color: "white",
-                    borderColor: "orange",
-                  },
-                  "& .MuiPaginationItem-root.Mui-selected:hover": {
-                    backgroundColor: "#ea580c",
-                    borderColor: "#ff8c00",
-                  },
-                }}
               />
             </Stack>
           </div>
