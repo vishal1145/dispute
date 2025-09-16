@@ -16,8 +16,8 @@ import {
 const USERS_PER_PAGE = 10;
 
 export default function PotentialMember() {
-  const baseUrl = "https://dispute-mail.algofolks.com/users/api";
-  // const baseUrl = "http://localhost:5000/users/api";
+  // const baseUrl = "https://dispute-mail.algofolks.com/users/api";
+  const baseUrl = "http://localhost:5000/users/api";
   const [users, setUsers] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [sending, setSending] = useState(false);
@@ -30,11 +30,21 @@ export default function PotentialMember() {
   const [fieldFilter, setFieldFilter] = useState("");
   const [selected, setSelected] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState(null);
-  // const SAMPLE_URL = `${process.env.PUBLIC_URL}/potential_member.xlsx`;
+  const SAMPLE_URL = `${process.env.PUBLIC_URL}/members (1).xlsx`;
   const [formData, setFormData] = useState({
     subject: "",
     body: "",
   });
+
+  const [isOpen, setIsOpen] = useState(false); // modal state
+  const [subject, setSubject] = useState("");
+  const [body, setBody] = useState("");
+  // const [loading, setLoading] = useState(false);
+
+  // Open modal
+  const openModal = () => setIsOpen(true);
+  // Close modal
+  const closeModal = () => setIsOpen(false);
 
   const [open, setOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -159,7 +169,7 @@ export default function PotentialMember() {
 
   const handleSendSelected = async () => {
     if (selected.length === 0) {
-      alert("Please select at least one member.");
+      toast.error("Please select at least one member.");
       return;
     }
 
@@ -177,8 +187,12 @@ export default function PotentialMember() {
       const result = response.data;
 
       if (result.results) {
-        const successCount = result.results.filter((r) => r.status === "success").length;
-        const failCount = result.results.filter((r) => r.status === "failed").length;
+        const successCount = result.results.filter(
+          (r) => r.status === "success"
+        ).length;
+        const failCount = result.results.filter(
+          (r) => r.status === "failed"
+        ).length;
         toast.success(`Emails sent: ${successCount}, Failed: ${failCount}`);
       } else {
         toast.success("Emails sent successfully!");
@@ -196,6 +210,46 @@ export default function PotentialMember() {
 
   const handleClose = () => setOpenUpdate(false);
 
+  // POST new message
+  const handlePost = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.post(
+        "http://localhost:5000/users/api/message-edit",
+        {
+          subject,
+          body,
+        }
+      );
+      toast.success("Message created successfully!");
+      closeModal();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to create message");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // PUT update message for all users
+  const handlePut = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.put("http://localhost:5000/users/api/body-edit", {
+        subject,
+        body,
+      });
+      toast.success("All users’ messages updated successfully!");
+      await memberData();
+      closeModal();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update messages");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col lg:flex-row md:flex-row min-h-screen bg-gray-50">
       <Header />
@@ -209,10 +263,9 @@ export default function PotentialMember() {
           </div>
 
           <div className="flex flex-wrap gap-3 items-center">
-
-            {/* <a
+            <a
               href={SAMPLE_URL}
-              download="potential_member.xlsx"
+              download="members (1).xlsx"
               className="text-gray-600 underline hover:text-gray-800 transition-colors"
               style={{
                 textDecoration: "underline",
@@ -221,7 +274,7 @@ export default function PotentialMember() {
               }}
             >
               Download Sample File
-            </a> */}
+            </a>
 
             <input
               type="text"
@@ -282,6 +335,15 @@ export default function PotentialMember() {
                 {uploading ? "Uploading..." : "Upload Excel"}
               </button>
             </div>
+            {/* <div>
+              <button
+                onClick={openModal}
+                type="button"
+                className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 disabled:opacity-60"
+              >
+                Edit Message
+              </button>
+            </div> */}
           </div>
         </div>
 
@@ -359,8 +421,12 @@ export default function PotentialMember() {
                         {user.field}
                       </p>
                     </td>
-                    <td className="px-4 py-3 text-gray-700">{user.licensedBy}</td>
-                    <td className="px-4 py-3 text-gray-700">{user.licenseNumber}</td>
+                    <td className="px-4 py-3 text-gray-700">
+                      {user.licensedBy}
+                    </td>
+                    <td className="px-4 py-3 text-gray-700">
+                      {user.licenseNumber}
+                    </td>
                     <td className="px-4 py-3">
                       {user.email_sent ? (
                         <span className="bg-green-100 text-green-700 text-sm font-medium px-3 py-1 rounded-full">
@@ -396,7 +462,17 @@ export default function PotentialMember() {
                 page={currentPage}
                 onChange={handlePageChange}
                 variant="outlined"
-                color="primary"
+                sx={{
+                  "& .MuiPaginationItem-root.Mui-selected": {
+                    backgroundColor: "#f97316",
+                    color: "white",
+                    borderColor: "orange",
+                  },
+                  "& .MuiPaginationItem-root.Mui-selected:hover": {
+                    backgroundColor: "#ea580c",
+                    borderColor: "#ff8c00",
+                  },
+                }}
               />
             </Stack>
           </div>
@@ -410,18 +486,28 @@ export default function PotentialMember() {
                 top: "50%",
                 left: "50%",
                 transform: "translate(-50%, -50%)",
-                width: { xs: "90%", sm: 400 },
+                width: {
+                  xs: "90%", // Extra small screens
+                  sm: "80%", // Small screens
+                  md: 1100, // Medium screens
+                  lg: 1200, // Large screens
+                  xl: 1200, // Extra large screens
+                  // If you have a custom 2xl breakpoint, you can define it here or just use xl as max
+                },
+                maxHeight: "90vh", // Keep modal within screen height
                 bgcolor: "background.paper",
                 borderRadius: 2,
                 boxShadow: 24,
                 p: 4,
+                overflowY: "auto", // Allow scroll if content is too large
               }}
             >
-              <Typography variant="h6" mb={2}>
+              <Typography variant="h6" mb={2} sx={{  fontWeight: 600, color: '#111827'}}>
                 Edit Message
               </Typography>
               <TextField
                 fullWidth
+                className="text-gray-700"
                 label="Subject"
                 value={formData.subject}
                 onChange={(e) =>
@@ -432,13 +518,14 @@ export default function PotentialMember() {
               <TextField
                 fullWidth
                 label="Body"
+                className="text-gray-700"
                 value={formData.body}
                 onChange={(e) =>
                   setFormData({ ...formData, body: e.target.value })
                 }
                 margin="normal"
                 multiline
-                rows={4}
+                rows={15} // Show more lines by default for full content visibility
               />
               <Box mt={2} display="flex" justifyContent="flex-end" gap={1}>
                 <Button variant="outlined" onClick={handleClose}>
@@ -451,6 +538,53 @@ export default function PotentialMember() {
             </Box>
           </Modal>
         )}
+
+        {/* Modal */}
+        {/* {isOpen && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div className="bg-white rounded-lg p-6 w-96 relative">
+              <div className="flex items-center justify-between ">
+                <div>
+                  <h2 className="text-xl font-bold mb-4">Edit Message</h2>
+                </div>
+                <div onClick={closeModal}>
+                  <img src="/icons/close.svg" alt="close" className="w-4 h-4" />
+                </div>
+              </div>
+              <input
+                type="text"
+                placeholder="Subject"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                className="border p-2 rounded w-full mb-3"
+              />
+
+              <textarea
+                placeholder="Body"
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                className="border p-2 rounded w-full mb-3"
+              />
+
+              <div className="flex space-x-2">
+                <button
+                  onClick={handlePost}
+                  className=" w-full px-4 py-2 font-semibold bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-60"
+                  disabled={loading}
+                >
+                  Create Message
+                </button>
+                <button
+                  onClick={handlePut}
+                  className= "w-full px-4 py-2 font-semibold bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-60"
+                  disabled={loading}
+                >
+                  Update All Users
+                </button>
+              </div>
+            </div>
+          </div>
+        )} */}
       </div>
     </div>
   );
