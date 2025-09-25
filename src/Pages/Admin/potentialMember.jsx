@@ -12,12 +12,12 @@ import {
   Button,
   Stack,
 } from "@mui/material";
-
+import UpdateEmailModal from "../../components/UpdateEmailModal";
+import RowActionsMenu from "../../components/RowActionsMenu";
+import http from "../../utils/axios";
 const USERS_PER_PAGE = 10;
 
 export default function PotentialMember() {
-  // const baseUrl = "https://dispute-mail.algofolks.com/users/api";
-  const baseUrl = "http://localhost:5000/users/api";
   const [users, setUsers] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [sending, setSending] = useState(false);
@@ -29,12 +29,35 @@ export default function PotentialMember() {
   const [search, setSearch] = useState("");
   const [fieldFilter, setFieldFilter] = useState("");
   const [selected, setSelected] = useState([]);
+  const [selectedUser, setSelectedUser] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const SAMPLE_URL = `${process.env.PUBLIC_URL}/members (1).xlsx`;
   const [formData, setFormData] = useState({
     subject: "",
     body: "",
   });
+
+  const [openUpdateEmail, setOpenUpdateEmail] = useState(false);
+  const [saving , setSaving] = useState(false);
+
+  const handleOpenUpdateEmail = (user) => {
+    setSelectedUser(user);
+    setOpenUpdateEmail(true);
+  };
+
+
+  const handleSaveEmail = async (newEmail, user) => {
+    setSaving(true);
+    try {
+      console.log(`email:${newEmail} user:${user}`)
+    } finally {
+      setSaving(false);
+    }
+  };
+
+
+
+
 
   const [isOpen, setIsOpen] = useState(false); // modal state
   const [subject, setSubject] = useState("");
@@ -50,12 +73,18 @@ export default function PotentialMember() {
   const [isEditing, setIsEditing] = useState(false);
   const [editRow, setEditRow] = useState(null);
 
-  const fieldOptions = [...new Set(users.map((row) => row.field))];
-
+  const fieldOptions = [ 
+          "Mediation",
+          "Conciliation",
+          "Arbitration",
+          "Negotiation",
+          "Facilitation",
+          "Litigation"];
+          
   const memberData = async () => {
     try {
       setLoading(true);
-      const apiResponse = await axios.get(baseUrl);
+      const apiResponse = await http.get('/');
       const response = apiResponse.data;
       setUsers(response.data || []);
     } catch (error) {
@@ -69,9 +98,10 @@ export default function PotentialMember() {
     memberData();
   }, []);
 
+  
   const updateUser = async () => {
     try {
-      await axios.put(`${baseUrl}/edit/${selectedUserId}`, formData);
+      await http.put(`/edit/${selectedUserId}`, formData);
       toast.success("Message updated successfully!");
       memberData();
       setFormData({ subject: "", body: "" });
@@ -92,8 +122,9 @@ export default function PotentialMember() {
     });
   };
 
-  const handleExcelUploadClick = () => fileInputRef.current?.click();
 
+
+  const handleExcelUploadClick = () => fileInputRef.current?.click();
   const handleFileChange = (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -106,7 +137,7 @@ export default function PotentialMember() {
     formData.append("excel_file", file);
     try {
       setUploading(true);
-      await axios.post(`${baseUrl}/excel-upload`, formData, {
+      await http.post(`/excel-upload`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       await memberData();
@@ -180,7 +211,7 @@ export default function PotentialMember() {
       const selectedMembers = users.filter((u) => selected.includes(u.email));
 
       // Send in bulk
-      const response = await axios.put(`${baseUrl}/send-email`, {
+      const response = await http.put(`/send-email`, {
         data: selectedMembers,
       });
 
@@ -215,7 +246,7 @@ export default function PotentialMember() {
     try {
       setLoading(true);
       const res = await axios.post(
-        "http://localhost:5000/users/api/message-edit",
+        "http://localhost:5000/api/users/message-edit",
         {
           subject,
           body,
@@ -235,7 +266,7 @@ export default function PotentialMember() {
   const handlePut = async () => {
     try {
       setLoading(true);
-      const res = await axios.put("http://localhost:5000/users/api/body-edit", {
+      const res = await axios.put("http://localhost:5000/api/users/body-edit", {
         subject,
         body,
       });
@@ -250,11 +281,39 @@ export default function PotentialMember() {
     }
   };
 
+
+  const handleSendEmail = (email)=>{
+    try {
+      await http.put(`/edit/${selectedUserId}`, {email});
+      toast.success("Message updated successfully!");
+      memberData();
+      setFormData({ subject: "", body: "" });
+    } catch (error) {
+      console.error("Error updating message:", error);
+      toast.error("Failed to update message");
+    } finally {
+      setOpenUpdate(false);
+    }
+
+    window.alert(`email : ${email}`)
+  }
+
   return (
     <div className="flex flex-col lg:flex-row md:flex-row min-h-screen bg-gray-50">
       <Header />
       <div className="p-4 sm:p-6 flex-1 overflow-x-hidden">
         <Toaster position="top-right" />
+
+        {/* update email modal */}
+        <UpdateEmailModal
+          open={openUpdateEmail}
+          onClose={() => setOpenUpdateEmail(false)}
+          user={selectedUser}
+          onSave={handleSaveEmail}
+          saving={saving}
+        />
+
+
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-5">
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-gray-600">
@@ -312,6 +371,8 @@ export default function PotentialMember() {
                 />
               </svg>
             </div>
+
+
 
             <div>
               <input
@@ -428,18 +489,29 @@ export default function PotentialMember() {
                       {user.licenseNumber}
                     </td>
                     <td className="px-4 py-3">
-                      {user.email_sent ? (
-                        <span className="bg-green-100 text-green-700 text-sm font-medium px-3 py-1 rounded-full">
-                          Sent
-                        </span>
-                      ) : (
-                        <button
-                          onClick={() => handleEditMessage(user)}
-                          className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-3 py-1 rounded-lg transition-colors"
-                        >
-                          Edit
-                        </button>
-                      )}
+
+                      <RowActionsMenu
+                        user={user}
+                        onUpdateEmail={handleOpenUpdateEmail}
+                        onEditMessage={handleEditMessage}
+                        onSendEmail={handleSendEmail}
+                      />
+
+
+                      {/* {
+                        (!!user?.email && user.email.toString().trim() !== "")
+                          ? 
+
+                          <button onClick={() => handleOpenUpdateEmail(user)} className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-3 py-1 rounded-lg transition-colors">Add Email</button>
+                          
+                          
+                          // (user?.email_sent
+                          //     ? <span className="bg-green-100 text-green-700 text-sm font-medium px-3 py-1 rounded-full">Sent</span>
+                          //     : <button onClick={() => handleEditMessage(user)} className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-3 py-1 rounded-lg transition-colors">Edit</button>
+                          //   )
+                          : <button onClick={() => handleOpenUpdateEmail(user)} className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-3 py-1 rounded-lg transition-colors">Add Email</button>
+                      } */}
+
                     </td>
                   </tr>
                 ))
@@ -487,9 +559,9 @@ export default function PotentialMember() {
                 left: "50%",
                 transform: "translate(-50%, -50%)",
                 width: {
-                  xs: "90%", // Extra small screens
-                  sm: "80%", // Small screens
-                  md: 1100, // Medium screens
+                  xs: "90%",
+                  sm: "80%",
+                  md: 1100,
                   lg: 1200, // Large screens
                   xl: 1200, // Extra large screens
                   // If you have a custom 2xl breakpoint, you can define it here or just use xl as max
@@ -538,6 +610,8 @@ export default function PotentialMember() {
             </Box>
           </Modal>
         )}
+
+
 
         {/* Modal */}
         {/* {isOpen && (
