@@ -275,12 +275,12 @@ export default function PotentialMember() {
               download="members (1).xlsx"
               className="text-sm text-gray-500 hover:text-gray-700 underline"
             >
-              Download Sample
+              Download Sample File
             </a>
 
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search by name or state"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500 min-w-[200px]"
