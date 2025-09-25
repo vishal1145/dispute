@@ -7,7 +7,6 @@ import {
   Chip,
   Stack,
 } from "@mui/material";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 import EditIcon from "@mui/icons-material/Edit";
 import SendIcon from "@mui/icons-material/Send";
 import EmailIcon from "@mui/icons-material/Email";
@@ -36,7 +35,6 @@ export default function RowInlineActions({
   onUpdateEmail,   // () => void
   onEditMessage,   // () => void
   onSendMessage,   // () => void
-  onMore,          // optional
 }) {
   const hasEmail = useMemo(() => !!normalizeEmail(user?.email), [user]);
   const emailSent = !!user?.email_sent;
@@ -79,19 +77,9 @@ export default function RowInlineActions({
     );
   }
 
-  // No email: 3-dot icon + Add Email (both tiny)
+  // No email: Add Email button only
   return (
     <Stack direction="row" spacing={1} alignItems="center" justifyContent="flex-end">
-      <Tooltip title="Actions">
-        <IconButton
-          size="small"
-          onClick={() => onMore?.(user)}
-          aria-label="row actions"
-          sx={{ width: 28, height: 28 }}
-        >
-          <MoreVertIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
       <Button
         size="small"
         variant="contained"

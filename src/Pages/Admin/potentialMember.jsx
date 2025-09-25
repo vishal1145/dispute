@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef } from "react";
 import Header from "../../components/header";
 import { Toaster } from "react-hot-toast";
 import toast from "react-hot-toast";
-import axios from "axios";
 import Pagination from "@mui/material/Pagination";
 import {
   Modal,
@@ -29,16 +28,17 @@ export default function PotentialMember() {
   const [search, setSearch] = useState("");
   const [fieldFilter, setFieldFilter] = useState("");
   const [selected, setSelected] = useState([]);
-  const [selectedUser, setSelectedUser] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [selectedUserId, setSelectedUserId] = useState(null);
-  const SAMPLE_URL = `${process.env.PUBLIC_URL}/members (1).xlsx`;
+  const [openUpdateEmail, setOpenUpdateEmail] = useState(false);
+  const [saving, setSaving] = useState(false);
+  
   const [formData, setFormData] = useState({
     subject: "",
     body: "",
   });
 
-  const [openUpdateEmail, setOpenUpdateEmail] = useState(false);
-  const [saving , setSaving] = useState(false);
+  const SAMPLE_URL = `${process.env.PUBLIC_URL}/members (1).xlsx`;
 
   const handleOpenUpdateEmail = (user) => {
     setSelectedUser(user);
@@ -49,37 +49,20 @@ export default function PotentialMember() {
   const handleSaveEmail = async (newEmail, user) => {
     setSaving(true);
     try {
-      console.log(`email:${newEmail} user:${user}`)
+      console.log(`email:${newEmail} user:${user}`);
     } finally {
       setSaving(false);
     }
   };
 
-
-
-
-
-  const [isOpen, setIsOpen] = useState(false); // modal state
-  const [subject, setSubject] = useState("");
-  const [body, setBody] = useState("");
-  // const [loading, setLoading] = useState(false);
-
-  // Open modal
-  const openModal = () => setIsOpen(true);
-  // Close modal
-  const closeModal = () => setIsOpen(false);
-
-  const [open, setOpen] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editRow, setEditRow] = useState(null);
-
-  const fieldOptions = [ 
-          "Mediation",
-          "Conciliation",
-          "Arbitration",
-          "Negotiation",
-          "Facilitation",
-          "Litigation"];
+  const fieldOptions = [
+    "Mediation",
+    "Conciliation", 
+    "Arbitration",
+    "Negotiation",
+    "Facilitation",
+    "Litigation"
+  ];
           
   const memberData = async () => {
     try {
@@ -160,7 +143,7 @@ export default function PotentialMember() {
       name.includes(query) || state.includes(query) || field.includes(query);
 
     const matchesField = fieldFilter
-      ? row.field.toLowerCase() === fieldFilter.toLowerCase()
+      ? field === fieldFilter.toLowerCase()
       : true;
 
     return matchesSearch && matchesField;
@@ -241,50 +224,9 @@ export default function PotentialMember() {
 
   const handleClose = () => setOpenUpdate(false);
 
-  // POST new message
-  const handlePost = async () => {
+  const handleSendEmail = async (email) => {
     try {
-      setLoading(true);
-      const res = await axios.post(
-        "http://localhost:5000/api/users/message-edit",
-        {
-          subject,
-          body,
-        }
-      );
-      toast.success("Message created successfully!");
-      closeModal();
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to create message");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // PUT update message for all users
-  const handlePut = async () => {
-    try {
-      setLoading(true);
-      const res = await axios.put("http://localhost:5000/api/users/body-edit", {
-        subject,
-        body,
-      });
-      toast.success("All users’ messages updated successfully!");
-      await memberData();
-      closeModal();
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to update messages");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-
-  const handleSendEmail = (email)=>{
-    try {
-      await http.put(`/edit/${selectedUserId}`, {email});
+      await http.put(`/edit/${selectedUserId}`, { email });
       toast.success("Message updated successfully!");
       memberData();
       setFormData({ subject: "", body: "" });
@@ -294,9 +236,8 @@ export default function PotentialMember() {
     } finally {
       setOpenUpdate(false);
     }
+  };
 
-    window.alert(`email : ${email}`)
-  }
 
   return (
     <div className="flex flex-col lg:flex-row md:flex-row min-h-screen bg-gray-50">
@@ -314,97 +255,73 @@ export default function PotentialMember() {
         />
 
 
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-5">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-600">
-              Potential Member
+            <h1 className="text-xl font-semibold text-gray-800">
+              Potential Members
             </h1>
+            {(search || fieldFilter) && (
+              <p className="text-sm text-gray-500 mt-1">
+                {filteredData.length} of {users.length} members
+                {fieldFilter && ` • ${fieldFilter}`}
+                {search && ` • "${search}"`}
+              </p>
+            )}
           </div>
 
-          <div className="flex flex-wrap gap-3 items-center">
+          <div className="flex flex-wrap gap-2 items-center">
             <a
               href={SAMPLE_URL}
               download="members (1).xlsx"
-              className="text-gray-600 underline hover:text-gray-800 transition-colors"
-              style={{
-                textDecoration: "underline",
-                color: "gray",
-                border: "none",
-              }}
+              className="text-sm text-gray-500 hover:text-gray-700 underline"
             >
-              Download Sample File
+              Download Sample
             </a>
 
             <input
               type="text"
-              placeholder="Search by Name or State..."
+              placeholder="Search..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="flex-1 min-w-[200px] sm:w-[250px] p-2 border focus:outline-none focus:ring-2 focus:ring-orange-500 rounded-md"
+              className="px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500 min-w-[200px]"
             />
 
-            <div className="relative w-full sm:w-auto">
-              <select
-                value={fieldFilter}
-                onChange={(e) => setFieldFilter(e.target.value)}
-                className="peer border border-gray-300 rounded-md px-3 py-2 text-[16px] font-semibold text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500 w-full sm:w-auto appearance-none"
-              >
-                <option value="">All Field</option>
-                {fieldOptions.map((opt, i) => (
-                  <option key={i} value={opt}>
-                    {opt}
-                  </option>
-                ))}
-              </select>
-              <svg
-                aria-hidden="true"
-                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-600"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  d="M6 8l4 4 4-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
+            <select
+              value={fieldFilter}
+              onChange={(e) => setFieldFilter(e.target.value)}
+              className="px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500 bg-white"
+            >
+              <option value="">All Fields</option>
+              {fieldOptions.map((opt, i) => (
+                <option key={i} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select>
 
 
-
-            <div>
+            <div className="flex items-center gap-2">
               <input
                 type="file"
                 accept=".xlsx,.xls"
                 ref={fileInputRef}
                 onChange={handleFileChange}
-                style={{ display: "none" }}
+                className="hidden"
               />
               {excelFile && (
-                <span className="ml-3 text-sm text-gray-700">
+                <span className="text-xs text-gray-500 truncate max-w-[120px]">
                   {excelFile.name}
                 </span>
               )}
               <button
                 type="button"
                 onClick={handleExcelUploadClick}
-                className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 disabled:opacity-60"
+                className="px-3 py-2 bg-orange-500 text-white text-sm rounded-md hover:bg-orange-600 disabled:opacity-50 transition-colors"
                 disabled={uploading}
               >
-                {uploading ? "Uploading..." : "Upload Excel"}
+                {uploading ? "Uploading..." : "Upload"}
               </button>
             </div>
-            {/* <div>
-              <button
-                onClick={openModal}
-                type="button"
-                className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 disabled:opacity-60"
-              >
-                Edit Message
-              </button>
-            </div> */}
           </div>
         </div>
 
@@ -412,7 +329,7 @@ export default function PotentialMember() {
           <div className="mb-4">
             <button
               onClick={handleSendSelected}
-              className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 disabled:opacity-50"
+              className="px-3 py-2 bg-orange-500 text-white text-sm rounded-md hover:bg-orange-600 disabled:opacity-50 transition-colors"
               disabled={sending}
             >
               {sending ? "Sending..." : `Send Email (${selected.length})`}
@@ -420,11 +337,11 @@ export default function PotentialMember() {
           </div>
         )}
 
-        <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
-          <table className="w-full text-sm border-collapse min-w-[850px]">
+        <div className="overflow-x-auto bg-white rounded-lg">
+          <table className="w-full text-sm min-w-[800px]">
             <thead>
-              <tr className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-600">
-                <th className="px-4 py-3 border-b border-gray-200">
+              <tr className="border-b text-left text-gray-500 text-xs font-medium">
+                <th className="px-3 py-2">
                   <input
                     type="checkbox"
                     checked={
@@ -432,31 +349,26 @@ export default function PotentialMember() {
                       displayedUsers.every((m) => selected.includes(m.email))
                     }
                     onChange={(e) => toggleSelectAll(e.target.checked)}
+                    className="rounded"
                   />
                 </th>
-                <th className="px-4 py-3 border-b border-gray-200">Name</th>
-                <th className="px-4 py-3 border-b border-gray-200">Email</th>
-                <th className="px-4 py-3 border-b border-gray-200">State</th>
-                <th className="px-4 py-3 border-b border-gray-200">Number</th>
-                <th className="px-4 py-3 border-b border-gray-200">Field</th>
-                <th className="px-4 py-3 border-b border-gray-200">
-                  Licensed By
-                </th>
-                <th className="px-4 py-3 border-b border-gray-200">
-                  License Number
-                </th>
-                <th className="px-4 py-3 border-b border-gray-200">Action</th>
+                <th className="px-3 py-2">Name</th>
+                <th className="px-3 py-2">Email</th>
+                <th className="px-3 py-2">State</th>
+                <th className="px-3 py-2">Phone</th>
+                <th className="px-3 py-2">Field</th>
+                <th className="px-3 py-2">Licensed By</th>
+                <th className="px-3 py-2">License #</th>
+                <th className="px-3 py-2">Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="8" className="text-center py-4">
-                    <div className="flex justify-center items-center">
-                      <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
-                      <span className="ml-2 text-blue-500">
-                        Loading data...
-                      </span>
+                  <td colSpan="9" className="text-center py-8">
+                    <div className="flex justify-center items-center text-gray-400">
+                      <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
+                      <span className="ml-2">Loading...</span>
                     </div>
                   </td>
                 </tr>
@@ -464,61 +376,53 @@ export default function PotentialMember() {
                 displayedUsers.map((user, index) => (
                   <tr
                     key={index}
-                    className="hover:bg-gray-50 border-b border-gray-200 text-sm"
+                    className="hover:bg-gray-50 border-b border-gray-100"
                   >
-                    <td className="px-4 py-3">
+                    <td className="px-3 py-2">
                       <input
                         type="checkbox"
                         checked={selected.includes(user.email)}
                         onChange={() => toggleSelect(user.email)}
+                        className="rounded"
                       />
                     </td>
-                    <td className="px-4 py-3 text-gray-700">{user.name}</td>
-                    <td className="px-4 py-3 text-gray-700">{user.email}</td>
-                    <td className="px-4 py-3 text-gray-700">{user.state}</td>
-                    <td className="px-4 py-3 text-gray-700">{user.number}</td>
-                    <td className="px-4 py-3 text-gray-700">
-                      <p className="inline-flex items-center bg-blue-100 text-blue-700 text-[10px] px-3 py-1 rounded-full font-medium">
-                        {user.field}
-                      </p>
+                    <td className="px-3 py-2 font-medium text-gray-900 truncate max-w-[150px]" title={user.name}>
+                      {user.name}
                     </td>
-                    <td className="px-4 py-3 text-gray-700">
+                    <td className="px-3 py-2 text-gray-600 truncate max-w-[200px]" title={user.email}>
+                      {user.email}
+                    </td>
+                    <td className="px-3 py-2 text-gray-600 truncate max-w-[100px]" title={user.state}>
+                      {user.state}
+                    </td>
+                    <td className="px-3 py-2 text-gray-600 truncate max-w-[120px]" title={user.number}>
+                      {user.number}
+                    </td>
+                    <td className="px-3 py-2">
+                      <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded truncate max-w-[120px] block" title={user.field}>
+                        {user.field}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2 text-gray-600 truncate max-w-[150px]" title={user.licensedBy}>
                       {user.licensedBy}
                     </td>
-                    <td className="px-4 py-3 text-gray-700">
+                    <td className="px-3 py-2 text-gray-600 truncate max-w-[120px]" title={user.licenseNumber}>
                       {user.licenseNumber}
                     </td>
-                    <td className="px-4 py-3">
-
+                    <td className="px-3 py-2">
                       <RowActionsMenu
                         user={user}
                         onUpdateEmail={handleOpenUpdateEmail}
                         onEditMessage={handleEditMessage}
-                        onSendEmail={handleSendEmail}
+                        onSendMessage={handleSendEmail}
                       />
-
-
-                      {/* {
-                        (!!user?.email && user.email.toString().trim() !== "")
-                          ? 
-
-                          <button onClick={() => handleOpenUpdateEmail(user)} className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-3 py-1 rounded-lg transition-colors">Add Email</button>
-                          
-                          
-                          // (user?.email_sent
-                          //     ? <span className="bg-green-100 text-green-700 text-sm font-medium px-3 py-1 rounded-full">Sent</span>
-                          //     : <button onClick={() => handleEditMessage(user)} className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-3 py-1 rounded-lg transition-colors">Edit</button>
-                          //   )
-                          : <button onClick={() => handleOpenUpdateEmail(user)} className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-3 py-1 rounded-lg transition-colors">Add Email</button>
-                      } */}
-
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="8" className="text-center py-4 text-gray-500">
-                    No record found
+                  <td colSpan="9" className="text-center py-8 text-gray-400">
+                    No records found
                   </td>
                 </tr>
               )}
@@ -527,26 +431,24 @@ export default function PotentialMember() {
         </div>
 
         {totalPages > 1 && (
-          <div className="flex justify-center sm:justify-end mt-5">
-            <Stack spacing={2}>
-              <Pagination
-                count={totalPages}
-                page={currentPage}
-                onChange={handlePageChange}
-                variant="outlined"
-                sx={{
-                  "& .MuiPaginationItem-root.Mui-selected": {
-                    backgroundColor: "#f97316",
-                    color: "white",
-                    borderColor: "orange",
-                  },
-                  "& .MuiPaginationItem-root.Mui-selected:hover": {
-                    backgroundColor: "#ea580c",
-                    borderColor: "#ff8c00",
-                  },
-                }}
-              />
-            </Stack>
+          <div className="flex justify-end mt-4">
+            <Pagination
+              count={totalPages}
+              page={currentPage}
+              onChange={handlePageChange}
+              variant="outlined"
+              size="small"
+              sx={{
+                "& .MuiPaginationItem-root.Mui-selected": {
+                  backgroundColor: "#f97316",
+                  color: "white",
+                  borderColor: "#f97316",
+                },
+                "& .MuiPaginationItem-root.Mui-selected:hover": {
+                  backgroundColor: "#ea580c",
+                },
+              }}
+            />
           </div>
         )}
 
@@ -610,55 +512,6 @@ export default function PotentialMember() {
             </Box>
           </Modal>
         )}
-
-
-
-        {/* Modal */}
-        {/* {isOpen && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div className="bg-white rounded-lg p-6 w-96 relative">
-              <div className="flex items-center justify-between ">
-                <div>
-                  <h2 className="text-xl font-bold mb-4">Edit Message</h2>
-                </div>
-                <div onClick={closeModal}>
-                  <img src="/icons/close.svg" alt="close" className="w-4 h-4" />
-                </div>
-              </div>
-              <input
-                type="text"
-                placeholder="Subject"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                className="border p-2 rounded w-full mb-3"
-              />
-
-              <textarea
-                placeholder="Body"
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
-                className="border p-2 rounded w-full mb-3"
-              />
-
-              <div className="flex space-x-2">
-                <button
-                  onClick={handlePost}
-                  className=" w-full px-4 py-2 font-semibold bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-60"
-                  disabled={loading}
-                >
-                  Create Message
-                </button>
-                <button
-                  onClick={handlePut}
-                  className= "w-full px-4 py-2 font-semibold bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-60"
-                  disabled={loading}
-                >
-                  Update All Users
-                </button>
-              </div>
-            </div>
-          </div>
-        )} */}
       </div>
     </div>
   );
