@@ -3,6 +3,7 @@ import Header from "../../components/header";
 import { Toaster } from "react-hot-toast";
 import toast from "react-hot-toast";
 import Pagination from "@mui/material/Pagination";
+
 import {
   Modal,
   Box,
@@ -11,6 +12,7 @@ import {
   Button,
   Stack,
 } from "@mui/material";
+
 import UpdateEmailModal from "../../components/UpdateEmailModal";
 import RowActionsMenu from "../../components/RowActionsMenu";
 import http from "../../utils/axios";
@@ -43,17 +45,35 @@ export default function PotentialMember() {
   const handleOpenUpdateEmail = (user) => {
     setSelectedUser(user);
     setOpenUpdateEmail(true);
+    setSelectedUserId(user._id);
   };
 
-
+ 
   const handleSaveEmail = async (newEmail, user) => {
-    setSaving(true);
-    try {
-      console.log(`email:${newEmail} user:${user}`);
-    } finally {
-      setSaving(false);
-    }
+  setSaving(true);
+  try {
+    // Call API with new email
+    await http.put(`/edit/${selectedUserId}`, { email: newEmail });
+
+    toast.success("Email updated successfully!");
+
+    memberData();
+
+    // Reset form (if you want to clear fields)
+    setFormData({ email: "" });
+
+  } catch (error) {
+    console.error("Error updating email:", error);
+    toast.error("Failed to update email");
+  } finally {
+    setOpenUpdate(false);   // close modal
+    setSaving(false);       // stop loading spinner
+  }
+
+  // Debug log
+  console.log(`Updated email: ${newEmail} for user: ${user}`);
   };
+
 
   const fieldOptions = [
     "Mediation",
@@ -226,7 +246,7 @@ export default function PotentialMember() {
 
   const handleSendEmail = async (email) => {
     try {
-      await http.put(`/edit/${selectedUserId}`, { email });
+      await http.put(`/send-email`, { email });
       toast.success("Message updated successfully!");
       memberData();
       setFormData({ subject: "", body: "" });
@@ -319,7 +339,7 @@ export default function PotentialMember() {
                 className="px-3 py-2 bg-orange-500 text-white text-sm rounded-md hover:bg-orange-600 disabled:opacity-50 transition-colors"
                 disabled={uploading}
               >
-                {uploading ? "Uploading..." : "Upload"}
+                {uploading ? "Uploading..." : "Upload Excel"}
               </button>
             </div>
           </div>
@@ -358,7 +378,7 @@ export default function PotentialMember() {
                 <th className="px-3 py-2">Phone</th>
                 <th className="px-3 py-2">Field</th>
                 <th className="px-3 py-2">Licensed By</th>
-                <th className="px-3 py-2">License #</th>
+                <th className="px-3 py-2">License  No</th>
                 <th className="px-3 py-2">Actions</th>
               </tr>
             </thead>

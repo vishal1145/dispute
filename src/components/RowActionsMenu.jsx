@@ -43,7 +43,7 @@ export default function RowInlineActions({
     return (
       <Chip
         icon={<MarkEmailReadIcon />}
-        label="Message Sent"
+        label="Sent"
         color="success"
         size="small"
         variant="outlined"
@@ -64,7 +64,7 @@ export default function RowInlineActions({
         >
           Edit
         </Button>
-        <Button
+        {/* <Button
           size="small"
           variant="contained"
           startIcon={<SendIcon />}
@@ -72,7 +72,7 @@ export default function RowInlineActions({
           onClick={() => onSendMessage?.(user)}
         >
           Send
-        </Button>
+        </Button> */}
       </Stack>
     );
   }
