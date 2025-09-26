@@ -1,8 +1,8 @@
 import axios from "axios";
 
 // Base URL for your app (override with env if you like)
-// const BASE_URL = "https://dispute-mail.algofolks.com/users/api";
-const BASE_URL = "http://localhost:5000/api/users";
+const BASE_URL = "https://dispute-mail.algofolks.com/api/users";
+// const BASE_URL = "http://localhost:5000/api/users";
 
 const TOKEN_KEY = "access_token";
 
