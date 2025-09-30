@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
@@ -6,6 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 export default function CreateJob() {
   const baseUrl = process.env.REACT_APP_Base_Url;
+  // const baseUrl = "http://localhost:5000/api/users"
   const navigate = useNavigate();
 
   const [jobDate, setJobDate] = useState("");
@@ -21,6 +22,13 @@ export default function CreateJob() {
   const [errors, setErrors] = useState({});
 
   const [loading, setLoading] = useState(false); // loader state
+
+  // Party modal states
+  const [isPartyModalOpen, setIsPartyModalOpen] = useState(false);
+  const [partyName, setPartyName] = useState("");
+  const [PartyEmail, setPartyEmail] = useState("");
+  const [partyPhone, setPartyPhone] = useState("");
+  const [parties, setParties] = useState([]); // store all parties added
 
   // const [excelFile, setExcelFile] = useState(null);
   // const fileInputRef = useRef(null);
@@ -89,6 +97,7 @@ export default function CreateJob() {
         briefOverview,
         intakeDetails,
         status,
+        parties, // include parties in payload
       };
       const apiResponse = await axios.post(`${baseUrl}/jobs`, body);
       console.log(apiResponse.data);
@@ -101,6 +110,42 @@ export default function CreateJob() {
     } finally {
       setLoading(false); // stop loader
     }
+  };
+
+  const handleAddParty = (e) => {
+    e.preventDefault();
+    setIsPartyModalOpen(true);
+  };
+
+  // 🔹 Submit party locally
+  const handlePartySubmit = () => {
+    if (!partyName || !PartyEmail || !partyPhone) {
+      toast.error("Please fill all party fields");
+      return;
+    }
+
+    const newParty = {
+      id: Date.now(), // unique ID for local state
+      name: partyName,
+      email: PartyEmail,
+      phone: partyPhone,
+    };
+
+    setParties([...parties, newParty]);
+    toast.success("Party added successfully!");
+
+    // reset modal fields
+    setPartyName("");
+    setPartyEmail("");
+    setPartyPhone("");
+    setIsPartyModalOpen(false);
+  };
+
+  // 🔹 Delete party locally
+  const handleDeleteParty = (id) => {
+    if (!window.confirm("Are you sure you want to delete this party?")) return;
+    setParties(parties.filter((p) => p.id !== id));
+    toast.success("Party deleted successfully!");
   };
 
   return (
@@ -302,11 +347,51 @@ export default function CreateJob() {
             )}
           </div>
 
-          {/* Buttons */}
+          {/* Party Section */}
+          <div className="col-span-1 md:col-span-2 ">
+            <h3 className="block text-sm font-medium mb-1">Parties</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {/* Add Party Card */}
+              <div
+                onClick={handleAddParty}
+                className="border-2 border-dashed border-orange-400 rounded-xl flex flex-col items-center justify-center cursor-pointer bg-orange-50 hover:bg-orange-100 transition p-6"
+              >
+                <span className="text-6xl text-orange-500 font-bold">+</span>
+                <p className="text-lg mt-2 text-orange-600 font-bold">
+                  Add Party
+                </p>
+              </div>
+
+              {/* Render Added Parties */}
+              {parties.map((p, index) => (
+                <div
+                  key={p.id}
+                  className="border rounded-xl shadow-sm p-4 flex flex-col justify-between bg-orange-50 relative"
+                >
+                  <div>
+                    <p className="font-semibold text-gray-700">{p.name}</p>
+                    <p className="text-sm text-gray-500">{p.email}</p>
+                    <p className="text-sm text-gray-500">{p.phone}</p>
+                  </div>
+
+                  {/* Delete Button */}
+                  <button
+                    onClick={() => handleDeleteParty(p.id)}
+                    className="mt-3 px-3 py-1 text-sm bg-red-100 text-red-600 rounded-lg hover:bg-red-200 self-end"
+                  >
+                    Delete
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
           <div className="col-span-1 md:col-span-2 flex justify-end gap-3 mt-4">
             <button
               type="submit"
-              className={`px-4 py-2 rounded text-white ${
+              form="createJobForm"
+              disabled={!isFormValid}
+              className={`px-6 py-2 rounded-lg text-white shadow ${
                 isFormValid
                   ? "bg-orange-600 hover:bg-orange-700"
                   : "bg-gray-400 cursor-not-allowed"
@@ -314,22 +399,14 @@ export default function CreateJob() {
             >
               Save Job
             </button>
-            {/* <button
-              type="button"
-              onClick={handleExcelUploadClick}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              Upload Excel
-            </button> */}
             <button
               type="button"
               onClick={handleJobSchedule}
-              className="px-4 py-2 border border-gray-300 rounded cursor-pointer hover:bg-gray-100"
+              className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-100"
             >
               Cancel
             </button>
           </div>
-
           {/* <div className="w-full max-w-3xl mt-4 flex justify-start">
             <input
               type="file"
@@ -346,6 +423,56 @@ export default function CreateJob() {
           </div> */}
         </form>
       </div>
+
+      {/* Party Modal */}
+      {isPartyModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-8 rounded-2xl shadow-2xl w-[90%] max-w-2xl">
+            <h2 className="text-2xl font-bold mb-6 text-gray-700 text-center">
+              Add Party Details
+            </h2>
+
+            <div className="space-y-5">
+              <input
+                type="text"
+                placeholder="Enter Party Name"
+                value={partyName}
+                onChange={(e) => setPartyName(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+              <textarea
+                placeholder="Enter Party Email"
+                value={PartyEmail}
+                onChange={(e) => setPartyEmail(e.target.value)}
+                rows="3"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
+              />
+              <input
+                type="text"
+                placeholder="Enter Contact Number"
+                value={partyPhone}
+                onChange={(e) => setPartyPhone(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+
+            <div className="flex justify-end gap-4 mt-8">
+              <button
+                onClick={() => setIsPartyModalOpen(false)}
+                className="px-6 py-3 border text-gray-700 border-gray-300 rounded-lg hover:bg-gray-100 text-lg"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handlePartySubmit}
+                className="px-6 py-3 bg-orange-600 text-white rounded-lg text-lg hover:bg-orange-700 shadow-md"
+              >
+                Add Party
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
