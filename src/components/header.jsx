@@ -154,7 +154,7 @@ export default function Header() {
         <div className="mt-auto text-left px-6">
           <button
             onClick={() => {
-              const SITE_URL = "https://restapi.algofolks.com/dashboard";
+              const SITE_URL = "https://disputesresolutions.com/dashboard";
               if (SITE_URL) {
                 try {
                   window.parent.location.href = `${SITE_URL}?logout=true`;

@@ -72,7 +72,7 @@ function MultiSelect({ name, value = [], options = [], placeholder = "Select..."
 
 /* -------------------------- Page -------------------------- */
 export default function MyAccount() {
-  const baseUrl = "https://restapi.algofolks.com/wp-json/wp-rest-api/v1";
+  const baseUrl = "https://disputesresolutions.com/wp-json/wp-rest-api/v1";
 
   // ✅ Only read userId from localStorage (never set it)
   const resolveInitialUserId = () => {
