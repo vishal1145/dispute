@@ -50,7 +50,7 @@ export default function Header() {
       <div className="md:hidden bg-black text-white flex justify-between items-center px-4 py-3">
         <div className="flex items-start gap-2">
           <img
-            src="/images/logo.webp"
+            src="/images/logo.png"
             alt="Dispute Resolutions"
             className="w-10 h-10"
           />
@@ -70,7 +70,7 @@ export default function Header() {
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
           <img
-            src="/images/logo.webp"
+            src="/images/logo.png"
             alt="Dispute Resolutions"
             className="w-[200px] h-[200px] object-contain mb-3 mr-5"
           />
