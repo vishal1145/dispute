@@ -81,72 +81,72 @@ export default function MemberApprove() {
   //   return (u.status || "").toLowerCase() === statusFilter.toLowerCase();
   // });
 
-  const sendEmailNotification = async (member, action) => {
-    try {
-      setSendingEmail(true);
+//   const sendEmailNotification = async (member, action) => {
+//     try {
+//       setSendingEmail(true);
       
-      // Create email templates based on action
-      const isApproved = action === 'approve';
-      const subject = isApproved 
-        ? 'Congratulations! Your Membership Application Has Been Approved'
-        : 'Update on Your Membership Application';
+//       // Create email templates based on action
+//       const isApproved = action === 'approve';
+//       const subject = isApproved 
+//         ? 'Congratulations! Your Membership Application Has Been Approved'
+//         : 'Update on Your Membership Application';
       
-      const body = isApproved 
-        ? `Dear ${member.firstName} ${member.lastName},
+//       const body = isApproved 
+//         ? `Dear ${member.firstName} ${member.lastName},
 
-Congratulations! We are pleased to inform you that your membership application has been approved.
+// Congratulations! We are pleased to inform you that your membership application has been approved.
 
-Your membership details:
-- Name: ${member.firstName} ${member.lastName}
-- Company: ${member.companyName || 'N/A'}
-- Expertise: ${member.expertise || 'N/A'}
-- Email: ${member.emailAddress}
+// Your membership details:
+// - Name: ${member.firstName} ${member.lastName}
+// - Company: ${member.companyName || 'N/A'}
+// - Expertise: ${member.expertise || 'N/A'}
+// - Email: ${member.emailAddress}
 
-You can now access all member benefits and features on our platform. If you have any questions or need assistance, please don't hesitate to contact us.
+// You can now access all member benefits and features on our platform. If you have any questions or need assistance, please don't hesitate to contact us.
 
-Welcome to our community!
+// Welcome to our community!
 
-Best regards,
-The Admin Team`
-        : `Dear ${member.firstName} ${member.lastName},
+// Best regards,
+// The Admin Team`
+//         : `Dear ${member.firstName} ${member.lastName},
 
-Thank you for your interest in joining our platform. After careful review of your application, we regret to inform you that we are unable to approve your membership at this time.
+// Thank you for your interest in joining our platform. After careful review of your application, we regret to inform you that we are unable to approve your membership at this time.
 
-Your application details:
-- Name: ${member.firstName} ${member.lastName}
-- Company: ${member.companyName || 'N/A'}
-- Expertise: ${member.expertise || 'N/A'}
+// Your application details:
+// - Name: ${member.firstName} ${member.lastName}
+// - Company: ${member.companyName || 'N/A'}
+// - Expertise: ${member.expertise || 'N/A'}
 
-We encourage you to review our membership requirements and consider reapplying in the future. If you have any questions about this decision, please feel free to contact us.
+// We encourage you to review our membership requirements and consider reapplying in the future. If you have any questions about this decision, please feel free to contact us.
 
-Thank you for your understanding.
+// Thank you for your understanding.
 
-Best regards,
-The Admin Team`;
+// Best regards,
+// The Admin Team`;
 
-      const templateParams = {
-        to_email: member.emailAddress,
-        from_name: emailConfig.fromName,
-        reply_to: emailConfig.fromEmail,
-        message: body,
-      };
+//       const templateParams = {
+//         to_email: member.emailAddress,
+//         from_name: emailConfig.fromName,
+//         reply_to: emailConfig.fromEmail,
+//         message: body,
+//       };
 
-      // Send email using EmailJS
-      await emailjs.send(
-        emailConfig.serviceId,
-        emailConfig.templateId,
-        templateParams,
-        emailConfig.publicKey
-      );
+//       // Send email using EmailJS
+//       await emailjs.send(
+//         emailConfig.serviceId,
+//         emailConfig.templateId,
+//         templateParams,
+//         emailConfig.publicKey
+//       );
       
-      toast.success(`Email notification sent to ${member.firstName} ${member.lastName}`);
-    } catch (error) {
-      console.error('Error sending email notification:', error);
-      toast.error(`Failed to send email to ${member.firstName} ${member.lastName}. Error: ${error.message}`);
-    } finally {
-      setSendingEmail(false);
-    }
-  };
+//       toast.success(`Email notification sent to ${member.firstName} ${member.lastName}`);
+//     } catch (error) {
+//       console.error('Error sending email notification:', error);
+//       toast.error(`Failed to send email to ${member.firstName} ${member.lastName}. Error: ${error.message}`);
+//     } finally {
+//       setSendingEmail(false);
+//     }
+//   };
 
   const handleMemberStatus = async (status, userId) => {
     try {
@@ -163,10 +163,10 @@ The Admin Team`;
       
       // Find the member to get their details for email
       const member = users.find(user => user.id === userId);
-      if (member && member.emailAddress) {
-        // Send email notification
-        await sendEmailNotification(member, status);
-      }
+      // if (member && member.emailAddress) {
+      //   // Send email notification
+      //   await sendEmailNotification(member, status);
+      // }
       
       toast.success(`Member ${status} successfully!`);
       getJobs();
