@@ -3,6 +3,8 @@ import Header from "../../components/header";
 import { Toaster } from "react-hot-toast";
 import toast from "react-hot-toast";
 import Pagination from "@mui/material/Pagination";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 import {
   Modal,
@@ -34,11 +36,20 @@ export default function PotentialMember() {
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [openUpdateEmail, setOpenUpdateEmail] = useState(false);
   const [saving, setSaving] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     subject: "",
     body: "",
   });
+
+  const firstName = users?.name?.trim().split(" ")[0] || "";
+  const formattedName =
+    firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
+
+  const previewContent = (formData?.body || "").replace(
+    "{name}",
+    formattedName
+  );
 
   const SAMPLE_URL = `${process.env.PUBLIC_URL}/members (1).xlsx`;
 
@@ -48,46 +59,43 @@ export default function PotentialMember() {
     setSelectedUserId(user._id);
   };
 
- 
   const handleSaveEmail = async (newEmail, user) => {
-  setSaving(true);
-  try {
-    // Call API with new email
-    await http.put(`/edit/${selectedUserId}`, { email: newEmail });
+    setSaving(true);
+    try {
+      // Call API with new email
+      await http.put(`/edit/${selectedUserId}`, { email: newEmail });
 
-    toast.success("Email updated successfully!");
+      toast.success("Email updated successfully!");
 
-    memberData();
+      memberData();
 
-    // Reset form (if you want to clear fields)
-    setFormData({ email: "" });
+      // Reset form (if you want to clear fields)
+      setFormData({ email: "" });
+    } catch (error) {
+      console.error("Error updating email:", error);
+      toast.error("Failed to update email");
+    } finally {
+      setOpenUpdate(false); // close modal
+      setSaving(false); // stop loading spinner
+    }
 
-  } catch (error) {
-    console.error("Error updating email:", error);
-    toast.error("Failed to update email");
-  } finally {
-    setOpenUpdate(false);   // close modal
-    setSaving(false);       // stop loading spinner
-  }
-
-  // Debug log
-  console.log(`Updated email: ${newEmail} for user: ${user}`);
+    // Debug log
+    console.log(`Updated email: ${newEmail} for user: ${user}`);
   };
-
 
   const fieldOptions = [
     "Mediation",
-    "Conciliation", 
+    "Conciliation",
     "Arbitration",
     "Negotiation",
     "Facilitation",
-    "Litigation"
+    "Litigation",
   ];
-          
+
   const memberData = async () => {
     try {
       setLoading(true);
-      const apiResponse = await http.get('/');
+      const apiResponse = await http.get("/");
       const response = apiResponse.data;
       setUsers(response.data || []);
     } catch (error) {
@@ -101,7 +109,6 @@ export default function PotentialMember() {
     memberData();
   }, []);
 
-  
   const updateUser = async () => {
     try {
       await http.put(`/edit/${selectedUserId}`, formData);
@@ -124,8 +131,6 @@ export default function PotentialMember() {
       body: u.message?.body || "",
     });
   };
-
-
 
   const handleExcelUploadClick = () => fileInputRef.current?.click();
   const handleFileChange = (event) => {
@@ -258,7 +263,6 @@ export default function PotentialMember() {
     }
   };
 
-
   return (
     <div className="flex flex-col lg:flex-row md:flex-row min-h-screen bg-gray-50">
       <Header />
@@ -273,7 +277,6 @@ export default function PotentialMember() {
           onSave={handleSaveEmail}
           saving={saving}
         />
-
 
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
           <div>
@@ -318,7 +321,6 @@ export default function PotentialMember() {
                 </option>
               ))}
             </select>
-
 
             <div className="flex items-center gap-2">
               <input
@@ -378,7 +380,7 @@ export default function PotentialMember() {
                 <th className="px-3 py-2">Phone</th>
                 <th className="px-3 py-2">Field</th>
                 <th className="px-3 py-2">Licensed By</th>
-                <th className="px-3 py-2">License  No</th>
+                <th className="px-3 py-2">License No</th>
                 <th className="px-3 py-2">Actions</th>
               </tr>
             </thead>
@@ -406,27 +408,48 @@ export default function PotentialMember() {
                         className="rounded"
                       />
                     </td>
-                    <td className="px-3 py-2 font-medium text-gray-900 truncate max-w-[150px]" title={user.name}>
+                    <td
+                      className="px-3 py-2 font-medium text-gray-900 truncate max-w-[150px]"
+                      title={user.name}
+                    >
                       {user.name}
                     </td>
-                    <td className="px-3 py-2 text-gray-600 truncate max-w-[200px]" title={user.email}>
+                    <td
+                      className="px-3 py-2 text-gray-600 truncate max-w-[200px]"
+                      title={user.email}
+                    >
                       {user.email}
                     </td>
-                    <td className="px-3 py-2 text-gray-600 truncate max-w-[100px]" title={user.state}>
+                    <td
+                      className="px-3 py-2 text-gray-600 truncate max-w-[100px]"
+                      title={user.state}
+                    >
                       {user.state}
                     </td>
-                    <td className="px-3 py-2 text-gray-600 truncate max-w-[120px]" title={user.number}>
+                    <td
+                      className="px-3 py-2 text-gray-600 truncate max-w-[120px]"
+                      title={user.number}
+                    >
                       {user.number}
                     </td>
                     <td className="px-3 py-2">
-                      <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded truncate max-w-[120px] block" title={user.field}>
+                      <span
+                        className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded truncate max-w-[120px] block"
+                        title={user.field}
+                      >
                         {user.field}
                       </span>
                     </td>
-                    <td className="px-3 py-2 text-gray-600 truncate max-w-[150px]" title={user.licensedBy}>
+                    <td
+                      className="px-3 py-2 text-gray-600 truncate max-w-[150px]"
+                      title={user.licensedBy}
+                    >
                       {user.licensedBy}
                     </td>
-                    <td className="px-3 py-2 text-gray-600 truncate max-w-[120px]" title={user.licenseNumber}>
+                    <td
+                      className="px-3 py-2 text-gray-600 truncate max-w-[120px]"
+                      title={user.licenseNumber}
+                    >
                       {user.licenseNumber}
                     </td>
                     <td className="px-3 py-2">
@@ -480,48 +503,47 @@ export default function PotentialMember() {
                 top: "50%",
                 left: "50%",
                 transform: "translate(-50%, -50%)",
-                width: {
-                  xs: "90%",
-                  sm: "80%",
-                  md: 1100,
-                  lg: 1200, // Large screens
-                  xl: 1200, // Extra large screens
-                  // If you have a custom 2xl breakpoint, you can define it here or just use xl as max
-                },
-                maxHeight: "90vh", // Keep modal within screen height
+                width: { xs: "90%", sm: "80%", md: 1100, lg: 1200, xl: 1200 },
+                maxHeight: "90vh",
                 bgcolor: "background.paper",
                 borderRadius: 2,
                 boxShadow: 24,
                 p: 4,
-                overflowY: "auto", // Allow scroll if content is too large
+                overflowY: "auto",
               }}
             >
-              <Typography variant="h6" mb={2} sx={{  fontWeight: 600, color: '#111827'}}>
+              <Typography
+                variant="h6"
+                mb={2}
+                sx={{ fontWeight: 600, color: "#111827" }}
+              >
                 Edit Message
               </Typography>
+
+              {/* ✍️ Subject Field */}
               <TextField
                 fullWidth
-                className="text-gray-700"
                 label="Subject"
+                className="text-gray-700"
                 value={formData.subject}
                 onChange={(e) =>
                   setFormData({ ...formData, subject: e.target.value })
                 }
                 margin="normal"
               />
-              <TextField
-                fullWidth
-                label="Body"
-                className="text-gray-700"
+
+              {/* 📝 React Quill Editor for body */}
+              <ReactQuill
+                theme="snow"
                 value={formData.body}
-                onChange={(e) =>
-                  setFormData({ ...formData, body: e.target.value })
-                }
-                margin="normal"
-                multiline
-                rows={15} // Show more lines by default for full content visibility
+                onChange={(value) => setFormData({ ...formData, body: value })}
+                style={{
+                  height: "400px",
+                  marginBottom: "20px",
+                }}
               />
-              <Box mt={2} display="flex" justifyContent="flex-end" gap={1}>
+              {/* 🚀 Actions */}
+              <Box mt={7} display="flex" justifyContent="flex-end" gap={1}>
                 <Button variant="outlined" onClick={handleClose}>
                   Cancel
                 </Button>
