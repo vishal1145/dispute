@@ -18,13 +18,13 @@ import {
 import UpdateEmailModal from "../../components/UpdateEmailModal";
 import RowActionsMenu from "../../components/RowActionsMenu";
 import http from "../../utils/axios";
-const USERS_PER_PAGE = 50;
 
 export default function PotentialMember() {
   const [users, setUsers] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [sending, setSending] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [usersPerPage, setUsersPerPage] = useState(50);
   const [loading, setLoading] = useState(false);
   const [openUpdate, setOpenUpdate] = useState(false);
   const [excelFile, setExcelFile] = useState(null);
@@ -174,10 +174,10 @@ export default function PotentialMember() {
     return matchesSearch && matchesField;
   });
 
-  const totalPages = Math.ceil(filteredData.length / USERS_PER_PAGE);
+  const totalPages = Math.ceil(filteredData.length / usersPerPage);
   const displayedUsers = filteredData.slice(
-    (currentPage - 1) * USERS_PER_PAGE,
-    currentPage * USERS_PER_PAGE
+    (currentPage - 1) * usersPerPage,
+    currentPage * usersPerPage
   );
 
   const handlePageChange = (_event, value) => {
@@ -186,7 +186,12 @@ export default function PotentialMember() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, fieldFilter]);
+  }, [search, fieldFilter, usersPerPage]);
+
+  const handleUsersPerPageChange = (e) => {
+    setUsersPerPage(Number(e.target.value));
+    setCurrentPage(1);
+  };
 
   // Toggle individual checkbox
   const toggleSelect = (email) => {
@@ -474,7 +479,20 @@ export default function PotentialMember() {
         </div>
 
         {totalPages > 1 && (
-          <div className="flex justify-end mt-4">
+          <div className="flex justify-between items-center mt-4">
+            <div className="flex items-center gap-2">
+              <label className="text-sm text-gray-600">Show:</label>
+              <select
+                value={usersPerPage}
+                onChange={handleUsersPerPageChange}
+                className="px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500 bg-white"
+              >
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="75">75</option>
+                <option value="100">100</option>
+              </select>
+            </div>
             <Pagination
               count={totalPages}
               page={currentPage}
