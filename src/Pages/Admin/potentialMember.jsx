@@ -18,7 +18,7 @@ import {
 import UpdateEmailModal from "../../components/UpdateEmailModal";
 import RowActionsMenu from "../../components/RowActionsMenu";
 import http from "../../utils/axios";
-const USERS_PER_PAGE = 10;
+const USERS_PER_PAGE = 50;
 
 export default function PotentialMember() {
   const [users, setUsers] = useState([]);
